@@ -24,24 +24,56 @@
 </html>
 
 <style>
-   body {
-     background-color: black;
-     overflow: hidden; /* Hides both horizontal and vertical scrollbars and stops scrolling */
-     height: 100%; /* Ensures the body takes up the full initial height of the viewport */
-     margin: 0; /* Removes default browser margins */
-     padding: 0; /* Removes default browser padding */
-   }
+    body {
+      background-color: black;
+      overflow: hidden; /* Hides both horizontal and vertical scrollbars and stops scrolling */
+      height: 100%; /* Ensures the body takes up the full initial height of the viewport */
+      margin: 0; /* Removes default browser margins */
+      padding: 0; /* Removes default browser padding */
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+    }
+
+    .logo img {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30%;
+
+      /* Standard property */
+      user-select: none;
+      /* Vendor prefixes for cross-browser compatibility */
+      -webkit-user-select: none; /* Safari, Chrome */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+
+      /* Prevents dragging */
+      -webkit-user-drag: none; /* Safari, Chrome */
+      user-drag: none; /* Standard property */
+    }
+
+    /* --- Media query for screens narrower than 600px (mobile) --- */
+    @media screen and (max-width: 1300px) {
+
+  head{
+  	display: none;
+  }
+
+    body{
+     overflow: auto;
+    }
 
    .logo {
-     display: grid;
-     place-items: center;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 100%;
    }
 
    .logo img {
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     height: 30%;
 
      /* Standard property */
      user-select: none;
@@ -54,32 +86,4 @@
      -webkit-user-drag: none; /* Safari, Chrome */
      user-drag: none; /* Standard property */
    }
-
-   /* --- Media query for screens narrower than 600px (mobile) --- */
-   @media screen and (max-width: 1300px) {
-
-   body{
-    overflow: auto;
-   }
-
-  .logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  }
-
-  .logo img {
-
-    /* Standard property */
-    user-select: none;
-    /* Vendor prefixes for cross-browser compatibility */
-    -webkit-user-select: none; /* Safari, Chrome */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-
-    /* Prevents dragging */
-    -webkit-user-drag: none; /* Safari, Chrome */
-    user-drag: none; /* Standard property */
-  }
 </style>
