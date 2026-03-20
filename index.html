@@ -1,1 +1,32 @@
-Hello World!
+<html>
+  <header></header>
+
+  <body>
+    <div class="logo">
+      <img src="/images/badgeicon-cream.png" />
+    </div>
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    background-color: black;
+    overflow: hidden; /* Hides both horizontal and vertical scrollbars and stops scrolling */
+    height: 100%; /* Ensures the body takes up the full initial height of the viewport */
+    margin: 0; /* Removes default browser margins */
+    padding: 0; /* Removes default browser padding */
+  }
+
+  .logo {
+    display: grid;
+    place-items: center;
+  }
+
+  .logo img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30%;
+  }
+</style>
