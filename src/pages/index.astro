@@ -15,12 +15,6 @@
       href="/favicon/apple-touch-icon.png"
     />
     <link rel="manifest" href="/favicon/site.webmanifest" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="HP Audiobook" />
   </head>
 
   <body
@@ -244,15 +238,24 @@
   draw();
 </script>
 
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"
+></script>
 <script>
   const audio = document.getElementById("audioPlayer");
   const playBtn = document.getElementById("playBtn");
+  const noSleep = new NoSleep();
 
   playBtn.addEventListener("click", async () => {
     try {
+      // Start audio
       await audio.play();
       playBtn.disabled = true;
 
+      // Enable NoSleep to prevent auto-lock
+      noSleep.enable();
+
+      // MediaSession API for lock screen controls
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: "Harry Potter: Chamber of Secrets",
