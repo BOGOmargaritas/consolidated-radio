@@ -19,7 +19,12 @@
 
   <body
     ><canvas id="visualizer"></canvas>
-    <audio controls playsinline src="/music.mp3" type="audio/mpeg"></audio>
+    <audio
+      controls
+      playsinline
+      src="/music.mp3"
+      type="audio/mpeg"
+      webkit-playsinline></audio>
     <div class="logo">
       <img src="/badgeicon-cream.png" />
     </div>
@@ -230,4 +235,13 @@
   }
 
   draw();
+</script>
+
+<script>
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: "Consolidated Radio",
+      artist: "Live Stream",
+    });
+  }
 </script>
