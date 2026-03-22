@@ -49,8 +49,8 @@
   source.connect(analyser);
   analyser.connect(audioCtx.destination);
 
-  analyser.fftSize = 512;
-  const bufferLength = analyser.frequencyBinCount;
+  analyser.fftSize = 1024;
+  const bufferLength = analyser.fftSize;
   const data = new Uint8Array(bufferLength);
 
   // ===== PERLIN NOISE =====
@@ -96,17 +96,20 @@
   function draw(time) {
     requestAnimationFrame(draw);
 
-    analyser.getByteFrequencyData(data);
+    // ✅ TIME DOMAIN DATA (fixes circle completely)
+    analyser.getByteTimeDomainData(data);
 
     ctx.clearRect(0, 0, w, h);
+
+    // background
     ctx.fillStyle = "#0a0a12";
     ctx.fillRect(0, 0, w, h);
 
-    // slow drift
-    driftX += 0.0003 * time * 0.001;
-    driftY += 0.0002 * time * 0.001;
+    // drift
+    driftX += 0.00002 * time;
+    driftY += 0.000015 * time;
 
-    // ===== TOPO LINES (PERLIN) =====
+    // ===== TOPOGRAPHIC LINES =====
     const lines = 30;
 
     for (let l = 0; l < lines; l++) {
@@ -127,18 +130,20 @@
       ctx.stroke();
     }
 
-    // ===== FIXED CIRCULAR WAVEFORM =====
+    // ===== PERFECT CIRCULAR WAVEFORM =====
     const radius = Math.min(w, h) * 0.22;
 
     ctx.beginPath();
 
     for (let i = 0; i <= bufferLength; i++) {
-      let idx = i % bufferLength;
+      let t = i / bufferLength;
 
-      let angle = (i / bufferLength) * Math.PI * 2;
+      let angle = t * Math.PI * 2;
 
-      let amp = data[idx] / 255;
-      let r = radius + amp * 90;
+      // normalize waveform (-1 to 1)
+      let v = (data[i % bufferLength] - 128) / 128;
+
+      let r = radius + v * 80;
 
       let x = cx + Math.cos(angle) * r;
       let y = cy + Math.sin(angle) * r;
@@ -149,7 +154,8 @@
 
     ctx.closePath();
 
-    ctx.shadowBlur = 15;
+    // glow
+    ctx.shadowBlur = 20;
     ctx.shadowColor = "#C2B0C9";
 
     ctx.strokeStyle = "#F4EFD2";
@@ -159,11 +165,10 @@
     ctx.shadowBlur = 0;
 
     // ===== SUBTLE INTERFERENCE =====
-    if (Math.random() < 0.05) {
+    if (Math.random() < 0.04) {
       let y = Math.random() * h;
-
-      let slice = ctx.getImageData(0, y, w, 8);
-      ctx.putImageData(slice, (Math.random() - 0.5) * 15, y);
+      let slice = ctx.getImageData(0, y, w, 6);
+      ctx.putImageData(slice, (Math.random() - 0.5) * 10, y);
     }
 
     // vignette
