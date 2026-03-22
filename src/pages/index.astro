@@ -19,7 +19,8 @@
 
   <body
     ><canvas id="visualizer"></canvas>
-    <audio controls src="/music.mp3" type="audio/mpeg"></audio>
+    <button id="playBtn">Play Audio</button>
+    <audio id="myAudio" controls src="/music.mp3" type="audio/mpeg"></audio>
     <div class="logo">
       <img src="/badgeicon-cream.png" />
     </div>
@@ -234,22 +235,31 @@
 
 <script>
   const audio = document.getElementById("myAudio");
+  const btn = document.getElementById("playBtn");
 
-  // Enable autoplay on user interaction
-  document.body.addEventListener(
-    "click",
-    () => {
-      if (audio.paused) {
-        audio.play().catch((e) => console.log("Playback error:", e));
+  btn.addEventListener("click", async () => {
+    try {
+      await audio.play();
+      console.log("Audio started!");
+
+      // Use Media Session API for iOS background playback
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: "My Track",
+          artist: "Artist Name",
+          album: "Album Name",
+          artwork: [{ src: "cover.jpg", sizes: "512x512", type: "image/jpeg" }],
+        });
+
+        navigator.mediaSession.setActionHandler("play", () => {
+          audio.play();
+        });
+        navigator.mediaSession.setActionHandler("pause", () => {
+          audio.pause();
+        });
       }
-    },
-    { once: true },
-  );
-
-  // Optional: Keep audio playing after page visibility changes
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && audio.paused) {
-      audio.play().catch((e) => console.log("Playback error:", e));
+    } catch (err) {
+      console.log("Playback failed:", err);
     }
   });
 </script>
