@@ -86,35 +86,44 @@
   resize();
   window.addEventListener("resize", resize);
 
-  // ── AUDIO CONTEXT (created/destroyed based on visibility) ─────
-  let audioCtx = null;
-  let source = null;
+  // ── AUDIO SETUP ───────────────────────────────────────────────
+  // We use captureStream() so the audio element is NEVER routed through
+  // AudioContext — iOS treats it as a plain <audio> element and allows
+  // background playback. The analyser just "listens" without intercepting.
   let analyser = null;
   let freqData = null;
+  let visualizerReady = false;
 
-  function setupAudioContext() {
-    if (audioCtx) return; // already set up
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    source = audioCtx.createMediaElementSource(audio);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 512;
-    freqData = new Uint8Array(analyser.frequencyBinCount);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    audioCtx.resume();
-  }
-
-  function teardownAudioContext() {
-    if (!audioCtx) return;
+  function setupVisualizer() {
+    if (visualizerReady) return;
     try {
-      source.disconnect();
-      analyser.disconnect();
-      audioCtx.close();
-    } catch (e) {}
-    audioCtx = null;
-    source = null;
-    analyser = null;
-    freqData = null;
+      const stream = audio.captureStream
+        ? audio.captureStream()
+        : audio.mozCaptureStream
+          ? audio.mozCaptureStream()
+          : null;
+
+      if (!stream) {
+        // captureStream not supported (e.g. iOS Safari) — visualizer
+        // will just idle, but audio plays fine in the background
+        console.warn("captureStream not supported, visualizer disabled");
+        return;
+      }
+
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+
+      // IMPORTANT: source → analyser only, NOT to destination
+      // The <audio> element handles its own output independently
+      source.connect(analyser);
+
+      visualizerReady = true;
+    } catch (e) {
+      console.warn("Visualizer setup failed:", e);
+    }
   }
 
   // ── MEDIA SESSION ─────────────────────────────────────────────
@@ -139,35 +148,15 @@
     });
   }
 
-  // ── VISIBILITY: tear down AudioContext when leaving ───────────
-  let wasPlaying = false;
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
-      wasPlaying = playing;
-      teardownAudioContext();
-    } else {
-      if (wasPlaying) {
-        setupAudioContext();
-        audio.play();
-      }
-    }
-  });
-
   // ── PLAY STATE ────────────────────────────────────────────────
   let playing = false;
 
   audio.addEventListener("play", () => {
-    setupAudioContext();
+    setupVisualizer();
     playing = true;
   });
   audio.addEventListener("pause", () => (playing = false));
   audio.addEventListener("ended", () => (playing = false));
-
-  // Resume on touch
-  document.addEventListener("touchstart", () => {
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-  });
 
   // ── PERLIN NOISE ──────────────────────────────────────────────
   let perm = new Uint8Array(512);
@@ -218,20 +207,19 @@
   function draw() {
     requestAnimationFrame(draw);
 
-    // If no analyser (backgrounded), just fade to black and idle
-    const bass =
-      analyser && freqData
-        ? (analyser.getByteFrequencyData(freqData),
-          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
-            (freqData.length / 4) /
-            255)
-        : 0;
-    const treble =
-      analyser && freqData
-        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
-          ((freqData.length * 3) / 4) /
-          255
-        : 0;
+    let bass = 0,
+      treble = 0;
+    if (analyser && freqData) {
+      analyser.getByteFrequencyData(freqData);
+      bass =
+        freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
+        (freqData.length / 4) /
+        255;
+      treble =
+        freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
+        ((freqData.length * 3) / 4) /
+        255;
+    }
 
     ease = lerp(ease, playing ? 1 : 0, easeSpeed);
 
