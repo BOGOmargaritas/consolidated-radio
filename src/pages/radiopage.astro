@@ -23,6 +23,7 @@
 </style>
 
 <script client:load>
+  // ===== CANVAS =====
   const canvas = document.getElementById("visualizer");
   const ctx = canvas.getContext("2d");
 
@@ -36,10 +37,10 @@
   resize();
   window.addEventListener("resize", resize);
 
-  // 🎨 KRZ-ish palette
+  // ===== COLORS =====
   const colors = ["#594097", "#734BA1", "#C2B0C9", "#F4EFD2", "#55576C"];
 
-  // AUDIO
+  // ===== AUDIO =====
   const audio = document.querySelector("audio");
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const source = audioCtx.createMediaElementSource(audio);
@@ -49,7 +50,48 @@
   analyser.connect(audioCtx.destination);
 
   analyser.fftSize = 512;
-  const data = new Uint8Array(analyser.frequencyBinCount);
+  const bufferLength = analyser.frequencyBinCount;
+  const data = new Uint8Array(bufferLength);
+
+  // ===== PERLIN NOISE =====
+  let perm = new Uint8Array(512);
+  for (let i = 0; i < 256; i++) perm[i] = i;
+  perm.sort(() => Math.random() - 0.5);
+  for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+  function fade(t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+  function lerp(a, b, t) {
+    return a + t * (b - a);
+  }
+  function grad(hash, x, y) {
+    const h = hash & 3;
+    return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
+  }
+  function noise(x, y) {
+    let X = Math.floor(x) & 255;
+    let Y = Math.floor(y) & 255;
+
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+
+    let u = fade(x);
+    let v = fade(y);
+
+    let a = perm[X] + Y;
+    let b = perm[X + 1] + Y;
+
+    return lerp(
+      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+      v,
+    );
+  }
+
+  // ===== CAMERA DRIFT =====
+  let driftX = 0;
+  let driftY = 0;
 
   function draw(time) {
     requestAnimationFrame(draw);
@@ -57,42 +99,46 @@
     analyser.getByteFrequencyData(data);
 
     ctx.clearRect(0, 0, w, h);
-
-    // 🌌 background
     ctx.fillStyle = "#0a0a12";
     ctx.fillRect(0, 0, w, h);
 
-    // 🗺️ TOPOGRAPHIC FLOW LINES
-    const lines = 25;
+    // slow drift
+    driftX += 0.0003 * time * 0.001;
+    driftY += 0.0002 * time * 0.001;
+
+    // ===== TOPO LINES (PERLIN) =====
+    const lines = 30;
 
     for (let l = 0; l < lines; l++) {
       ctx.beginPath();
 
-      for (let x = 0; x < w; x += 8) {
-        let noise =
-          Math.sin(x * 0.01 + time * 0.0005 + l) + Math.cos(x * 0.005 + l * 2);
+      for (let x = 0; x < w; x += 6) {
+        let nx = x * 0.002 + driftX;
+        let ny = l * 0.1 + driftY;
 
-        let y = (h / lines) * l + noise * 20;
+        let y = (h / lines) * l + noise(nx, ny) * 60;
 
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
 
-      ctx.strokeStyle = colors[l % colors.length] + "33"; // faint
+      ctx.strokeStyle = colors[l % colors.length] + "22";
       ctx.lineWidth = 1;
       ctx.stroke();
     }
 
-    // 🔊 CIRCULAR WAVEFORM
-    const radius = Math.min(w, h) * 0.2;
+    // ===== FIXED CIRCULAR WAVEFORM =====
+    const radius = Math.min(w, h) * 0.22;
 
     ctx.beginPath();
 
-    for (let i = 0; i < data.length; i++) {
-      let angle = (i / data.length) * Math.PI * 2;
+    for (let i = 0; i <= bufferLength; i++) {
+      let idx = i % bufferLength;
 
-      let amp = data[i] / 255;
-      let r = radius + amp * 80;
+      let angle = (i / bufferLength) * Math.PI * 2;
+
+      let amp = data[idx] / 255;
+      let r = radius + amp * 90;
 
       let x = cx + Math.cos(angle) * r;
       let y = cy + Math.sin(angle) * r;
@@ -103,8 +149,7 @@
 
     ctx.closePath();
 
-    // glow
-    ctx.shadowBlur = 20;
+    ctx.shadowBlur = 15;
     ctx.shadowColor = "#C2B0C9";
 
     ctx.strokeStyle = "#F4EFD2";
@@ -113,27 +158,20 @@
 
     ctx.shadowBlur = 0;
 
-    // 📡 SIGNAL INTERFERENCE (subtle glitch lines)
-    if (Math.random() < 0.08) {
+    // ===== SUBTLE INTERFERENCE =====
+    if (Math.random() < 0.05) {
       let y = Math.random() * h;
 
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
-      ctx.fillRect(0, y, w, 2);
-
-      // horizontal jitter slice
-      let sliceHeight = 10 + Math.random() * 20;
-      let offset = (Math.random() - 0.5) * 20;
-
-      let img = ctx.getImageData(0, y, w, sliceHeight);
-      ctx.putImageData(img, offset, y);
+      let slice = ctx.getImageData(0, y, w, 8);
+      ctx.putImageData(slice, (Math.random() - 0.5) * 15, y);
     }
 
-    // subtle vignette
-    let grad = ctx.createRadialGradient(cx, cy, radius, cx, cy, w);
-    grad.addColorStop(0, "rgba(0,0,0,0)");
-    grad.addColorStop(1, "rgba(0,0,0,0.5)");
+    // vignette
+    let g = ctx.createRadialGradient(cx, cy, radius, cx, cy, w);
+    g.addColorStop(0, "rgba(0,0,0,0)");
+    g.addColorStop(1, "rgba(0,0,0,0.5)");
 
-    ctx.fillStyle = grad;
+    ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
   }
 
