@@ -233,19 +233,30 @@
 </script>
 
 <script>
-  const ctx = new AudioContext();
-  const dest = ctx.createMediaStreamDestination();
-
-  // connect your graph to dest
-  source.connect(dest);
-
-  // feed into <audio>
-  const audio = new Audio();
-  audio.srcObject = dest.stream;
-  audio.play();
-
   navigator.mediaSession.metadata = new MediaMetadata({
     title: "Station Name",
     artist: "Your Site",
   });
+
+  let audioCtx;
+  let analyser;
+  let source;
+
+  audio.addEventListener("play", () => {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      source = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+
+      analyser.fftSize = 512;
+    }
+
+    audioCtx.resume();
+    playing = true;
+  });
+
+  audio.play().catch(() => {});
 </script>
