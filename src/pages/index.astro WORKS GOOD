@@ -1,15 +1,25 @@
 <html>
   <head>
     <meta name="theme-color" content="#000000" />
-    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" />
-    <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/favicon/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
   </head>
 
-  <body>
-    <canvas id="visualizer"></canvas>
-
-    <audio id="audio" controls playsinline src="/music.mp3"></audio>
-
+  <body
+    ><canvas id="visualizer"></canvas>
+    <audio controls playsinline src="/music.mp3" type="audio/mpeg"></audio>
     <div class="logo">
       <img src="/badgeicon-cream.png" />
     </div>
@@ -18,20 +28,21 @@
 
 <style>
   body {
-    margin: 0;
-    overflow: hidden;
-    background: black;
+    overflow: hidden; /* Hides both horizontal and vertical scrollbars and stops scrolling */
+    height: 100%; /* Ensures the body takes up the full initial height of the viewport */
+    margin: 0; /* Removes default browser margins */
+    padding: 0; /* Removes default padding */
+    background-color: black;
   }
 
-  canvas {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
+  .logo {
   }
 
   .logo img {
     position: absolute;
-    top: 13%;
+    top: 13%; /* Moves the top edge to the vertical center */
+    transform: translateY(-50%); /* Pulls the image up by half its own height */
+    /* To also center horizontally, add: */
     left: 50%;
     transform: translate(-50%, -50%);
     height: 20%;
@@ -39,86 +50,28 @@
 
   audio {
     position: absolute;
-    bottom: 5%;
+    bottom: 5%; /* Moves the top edge to the vertical center */
+    transform: translateY(-50%); /* Pulls the image up by half its own height */
+    /* To also center horizontally, add: */
     left: 50%;
     transform: translate(-50%, -50%);
+    height: 20%;
+  }
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: #000; /* black background */
+  }
+
+  /* --- Media query for screens narrower than 600px (mobile) --- */
+  @media screen and (max-width: 1300px) {
+    audio {
+      bottom: 1%;
+    }
   }
 </style>
-
-<script>
-  const canvas = document.getElementById("visualizer");
-  const ctx = canvas.getContext("2d");
-  const audio = document.getElementById("audio");
-
-  let w, h, cx, cy;
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-    cx = w / 2;
-    cy = h / 2;
-  }
-  resize();
-  window.addEventListener("resize", resize);
-
-  // ✅ Web Audio (ANALYSIS ONLY)
-  let audioCtx = null;
-  let analyser = null;
-  let freqData = null;
-
-  let playing = false;
-
-  audio.addEventListener("play", () => {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-      const source = audioCtx.createMediaElementSource(audio);
-
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 512;
-
-      source.connect(analyser);
-      // ❌ DO NOT connect to destination
-
-      freqData = new Uint8Array(analyser.frequencyBinCount);
-    }
-
-    audioCtx.resume();
-    playing = true;
-  });
-
-  audio.addEventListener("pause", () => (playing = false));
-  audio.addEventListener("ended", () => (playing = false));
-
-  // ✅ Visualizer (safe if analyser is null)
-  function draw() {
-    requestAnimationFrame(draw);
-
-    if (!analyser) return;
-
-    analyser.getByteFrequencyData(freqData);
-
-    const avg = freqData.reduce((a, b) => a + b, 0) / freqData.length / 255;
-
-    ctx.fillStyle = "rgba(0,0,0,0.2)";
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, 100 + avg * 200, 0, Math.PI * 2);
-    ctx.strokeStyle = "#ffecdc";
-    ctx.lineWidth = 4;
-    ctx.stroke();
-  }
-
-  draw();
-
-  // ✅ Media Session (lock screen controls)
-  if ("mediaSession" in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: "Consolidated Radio",
-      artist: "Live Stream",
-    });
-  }
-</script>
 
 <script client:load>
   const canvas = document.getElementById("visualizer");
@@ -277,4 +230,33 @@
   }
 
   draw();
+</script>
+
+<script>
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: "Station Name",
+    artist: "Your Site",
+  });
+
+  let audioCtx;
+  let analyser;
+  let source;
+
+  audio.addEventListener("play", () => {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      source = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+
+      analyser.fftSize = 512;
+    }
+
+    audioCtx.resume();
+    playing = true;
+  });
+
+  audio.play().catch(() => {});
 </script>
