@@ -66,14 +66,14 @@
     return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
   }
   function noise(x, y) {
-    let X = Math.floor(x) & 255;
-    let Y = Math.floor(y) & 255;
+    let X = Math.floor(x) & 255,
+      Y = Math.floor(y) & 255;
     x -= Math.floor(x);
     y -= Math.floor(y);
-    let u = fade(x);
-    let v = fade(y);
-    let a = perm[X] + Y;
-    let b = perm[X + 1] + Y;
+    let u = fade(x),
+      v = fade(y);
+    let a = perm[X] + Y,
+      b = perm[X + 1] + Y;
     return lerp(
       lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
       lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
@@ -103,14 +103,15 @@
     driftY = 0;
   let rotation = 0;
   let playing = false;
-  let ease = 0; // 0..1
-  const easeSpeed = 0.02; // how fast to ease in/out
+  let ease = 0; // 0..1, for smooth ramp
+  const easeSpeed = 0.02;
 
   // SPEED SETTINGS
-  const rotationSpeed = 0.000025; // 50% slower than before
-  const driftSpeedX = 0.0006; // 100% faster
+  const rotationSpeed = 0.000012; // much slower rotation
+  const driftSpeedX = 0.0006; // background drift
   const driftSpeedY = 0.0004;
 
+  // AUDIO PLAY/PAUSE HANDLERS
   audio.addEventListener("play", () => {
     audioCtx.resume();
     playing = true;
@@ -125,10 +126,11 @@
   function draw() {
     requestAnimationFrame(draw);
 
+    // TIME-DOMAIN DATA
     analyser.getByteTimeDomainData(data);
     let waveform = smoothArray(data, 6);
 
-    // ease in/out
+    // EASE IN/OUT
     ease = lerp(ease, playing ? 1 : 0, easeSpeed);
 
     ctx.clearRect(0, 0, w, h);
@@ -136,30 +138,30 @@
     ctx.fillRect(0, 0, w, h);
 
     // ===== BACKGROUND =====
-    if (ease > 0) {
-      driftX += driftSpeedX * ease;
-      driftY += driftSpeedY * ease;
-
-      const bands = 20;
-      for (let b = 0; b < bands; b++) {
-        ctx.beginPath();
-        const offset = bandOffsets[b];
-        for (let x = 0; x < w; x += 8) {
-          let nx = x * 0.002 + driftX + offset;
-          let ny = b * 0.1 + driftY;
-          let y =
-            h * 0.1 +
-            h * 0.7 * (b / bands) +
-            noise(nx, ny) * 50 +
-            Math.sin(x * 0.01 + offset) * 10;
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = colors[b % colors.length] + "22";
-        ctx.lineWidth = 1;
-        ctx.stroke();
+    // background always rendered
+    const bands = 20;
+    for (let b = 0; b < bands; b++) {
+      ctx.beginPath();
+      const offset = bandOffsets[b];
+      for (let x = 0; x < w; x += 8) {
+        let nx = x * 0.002 + driftX * ease + offset;
+        let ny = b * 0.1 + driftY * ease;
+        let y =
+          h * 0.1 +
+          h * 0.7 * (b / bands) +
+          noise(nx, ny) * 50 +
+          Math.sin(x * 0.01 + offset) * 10;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       }
+      ctx.strokeStyle = colors[b % colors.length] + "22";
+      ctx.lineWidth = 1;
+      ctx.stroke();
     }
+
+    // increment drift (multiplied by ease)
+    driftX += driftSpeedX * ease;
+    driftY += driftSpeedY * ease;
 
     // ===== CIRCULAR WAVEFORM =====
     const radius = Math.min(w, h) * 0.22;
@@ -169,7 +171,7 @@
       let t = i / totalPoints;
       let idx = i % totalPoints;
       let v = (waveform[idx] - 128) / 128;
-      let angle = t * Math.PI * 2 + rotation * ease; // rotation eases in/out
+      let angle = t * Math.PI * 2 + rotation * ease;
       let r = radius + v * 80;
       let x = cx + Math.cos(angle) * r;
       let y = cy + Math.sin(angle) * r;
@@ -178,7 +180,7 @@
     }
     ctx.closePath();
 
-    // enhanced glow
+    // ENHANCED GLOW
     ctx.shadowBlur = 50;
     ctx.shadowColor = "#C2B0C9";
     ctx.strokeStyle = "#F4EFD2";
@@ -186,21 +188,21 @@
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // subtle interference
+    // SUBTLE INTERFERENCE
     if (Math.random() < 0.04) {
       let y = Math.random() * h;
       let slice = ctx.getImageData(0, y, w, 6);
       ctx.putImageData(slice, (Math.random() - 0.5) * 10, y);
     }
 
-    // vignette
+    // VIGNETTE
     let g = ctx.createRadialGradient(cx, cy, radius, cx, cy, w);
     g.addColorStop(0, "rgba(0,0,0,0)");
     g.addColorStop(1, "rgba(0,0,0,0.5)");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    // rotate circle
+    // ROTATION
     rotation += rotationSpeed * ease;
   }
 
