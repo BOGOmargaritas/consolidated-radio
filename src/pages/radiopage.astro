@@ -26,24 +26,20 @@
   const canvas = document.getElementById("visualizer");
   const ctx = canvas.getContext("2d");
 
-  let w, h;
+  let w, h, cx, cy;
   function resize() {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
+    cx = w / 2;
+    cy = h / 2;
   }
   resize();
   window.addEventListener("resize", resize);
 
-  // 🎨 COLOR PALETTE (matched vibe)
-  const colors = [
-    "#594097", // deep violet
-    "#734BA1", // purple
-    "#C2B0C9", // dusty lavender
-    "#F4EFD2", // warm cream
-    "#55576C", // muted gray-blue
-  ];
+  // 🎨 KRZ-ish palette
+  const colors = ["#594097", "#734BA1", "#C2B0C9", "#F4EFD2", "#55576C"];
 
-  // AUDIO SETUP
+  // AUDIO
   const audio = document.querySelector("audio");
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const source = audioCtx.createMediaElementSource(audio);
@@ -52,53 +48,98 @@
   source.connect(analyser);
   analyser.connect(audioCtx.destination);
 
-  analyser.fftSize = 256;
+  analyser.fftSize = 512;
   const data = new Uint8Array(analyser.frequencyBinCount);
-
-  // 🌊 BLOBS
-  let blobs = Array.from({ length: 6 }).map((_, i) => ({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    r: 150 + Math.random() * 200,
-    color: colors[i % colors.length],
-    offset: Math.random() * 1000,
-  }));
 
   function draw(time) {
     requestAnimationFrame(draw);
 
     analyser.getByteFrequencyData(data);
 
-    let avg = data.reduce((a, b) => a + b, 0) / data.length;
-    let bass = data.slice(0, 10).reduce((a, b) => a + b, 0) / 10;
+    ctx.clearRect(0, 0, w, h);
 
-    // subtle fade (trail effect)
-    ctx.fillStyle = "rgba(10,10,15,0.15)";
+    // 🌌 background
+    ctx.fillStyle = "#0a0a12";
     ctx.fillRect(0, 0, w, h);
 
-    blobs.forEach((b, i) => {
-      let pulse = bass * 0.8;
+    // 🗺️ TOPOGRAPHIC FLOW LINES
+    const lines = 25;
 
-      let x = b.x + Math.sin(time * 0.0005 + b.offset) * 50;
-      let y = b.y + Math.cos(time * 0.0004 + b.offset) * 50;
-
-      let radius = b.r + pulse;
-
-      let gradient = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius);
-
-      gradient.addColorStop(0, b.color + "AA");
-      gradient.addColorStop(1, b.color + "00");
-
+    for (let l = 0; l < lines; l++) {
       ctx.beginPath();
-      ctx.fillStyle = gradient;
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fill();
-    });
+
+      for (let x = 0; x < w; x += 8) {
+        let noise =
+          Math.sin(x * 0.01 + time * 0.0005 + l) + Math.cos(x * 0.005 + l * 2);
+
+        let y = (h / lines) * l + noise * 20;
+
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.strokeStyle = colors[l % colors.length] + "33"; // faint
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // 🔊 CIRCULAR WAVEFORM
+    const radius = Math.min(w, h) * 0.2;
+
+    ctx.beginPath();
+
+    for (let i = 0; i < data.length; i++) {
+      let angle = (i / data.length) * Math.PI * 2;
+
+      let amp = data[i] / 255;
+      let r = radius + amp * 80;
+
+      let x = cx + Math.cos(angle) * r;
+      let y = cy + Math.sin(angle) * r;
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+
+    ctx.closePath();
+
+    // glow
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#C2B0C9";
+
+    ctx.strokeStyle = "#F4EFD2";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+
+    // 📡 SIGNAL INTERFERENCE (subtle glitch lines)
+    if (Math.random() < 0.08) {
+      let y = Math.random() * h;
+
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.fillRect(0, y, w, 2);
+
+      // horizontal jitter slice
+      let sliceHeight = 10 + Math.random() * 20;
+      let offset = (Math.random() - 0.5) * 20;
+
+      let img = ctx.getImageData(0, y, w, sliceHeight);
+      ctx.putImageData(img, offset, y);
+    }
+
+    // subtle vignette
+    let grad = ctx.createRadialGradient(cx, cy, radius, cx, cy, w);
+    grad.addColorStop(0, "rgba(0,0,0,0)");
+    grad.addColorStop(1, "rgba(0,0,0,0.5)");
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
   }
 
   draw(0);
 
-  // required for autoplay rules
+  // autoplay fix
   audio.addEventListener("play", () => {
     audioCtx.resume();
   });
