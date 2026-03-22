@@ -19,7 +19,6 @@
 
   <body
     ><canvas id="visualizer"></canvas>
-    <button id="playBtn">Play Audio</button>
     <audio
       id="myAudio"
       controls
@@ -236,45 +235,4 @@
   }
 
   draw();
-</script>
-
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"
-></script>
-<script>
-  const audio = document.getElementById("audioPlayer");
-  const playBtn = document.getElementById("playBtn");
-  const noSleep = new NoSleep();
-
-  playBtn.addEventListener("click", async () => {
-    try {
-      // Start audio
-      await audio.play();
-      playBtn.disabled = true;
-
-      // Enable NoSleep to prevent auto-lock
-      noSleep.enable();
-
-      // MediaSession API for lock screen controls
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: "Harry Potter: Chamber of Secrets",
-          artist: "Stephen Fry",
-          album: "Harry Potter Audiobooks",
-          artwork: [{ src: "cover.jpg", sizes: "512x512", type: "image/jpeg" }],
-        });
-        navigator.mediaSession.setActionHandler("play", () => audio.play());
-        navigator.mediaSession.setActionHandler("pause", () => audio.pause());
-      }
-    } catch (err) {
-      console.log("Playback failed:", err);
-    }
-  });
-
-  // Resume audio if tab becomes visible
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && audio.paused) {
-      audio.play().catch((e) => console.log("Resume failed:", e));
-    }
-  });
 </script>
