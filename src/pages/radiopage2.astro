@@ -93,7 +93,7 @@
   let ease = 0;
   const easeSpeed = 0.02;
 
-  // HANDLE AUDIO PLAY/PAUSE
+  // AUDIO PLAY/PAUSE
   audio.addEventListener("play", () => {
     audioCtx.resume();
     playing = true;
@@ -128,9 +128,8 @@
     ctx.fillRect(0, 0, w, h);
 
     // DRAW RINGS
-    rings.forEach((r, i) => {
+    rings.forEach((r) => {
       r.rotation += (r.speed + treble * 0.005) * ease;
-
       const currentRadius = r.radius + bass * 100 * ease;
 
       ctx.save();
@@ -142,27 +141,25 @@
       for (let p = 0; p <= points; p++) {
         let angle = (p / points) * Math.PI * 2;
 
-        const wobble =
+        // WIGGLE with Perlin noise scaled by music
+        const wiggle =
           noise(
             Math.cos(angle) * 5 + r.noiseOffset,
             Math.sin(angle) * 5 + r.noiseOffset,
-          ) * 15;
-
-        // signal trace along ring
-        const signal =
-          (freqData[Math.floor((p / points) * freqData.length)] / 255) * 20;
-        let x = Math.cos(angle) * (currentRadius + wobble + signal);
-        let y = Math.sin(angle) * (currentRadius + wobble + signal);
+          ) *
+          15 *
+          ease;
+        let x = Math.cos(angle) * (currentRadius + wiggle);
+        let y = Math.sin(angle) * (currentRadius + wiggle);
 
         if (p === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
       ctx.closePath();
 
-      // reduced glow
+      // REDUCED GLOW
       ctx.shadowBlur = 5;
       ctx.shadowColor = "#ffecdc";
-
       ctx.strokeStyle = "#ffecdc";
       ctx.lineWidth = 2 + bass * 1 * ease;
       ctx.stroke();
