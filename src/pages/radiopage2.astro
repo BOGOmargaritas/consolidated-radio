@@ -141,14 +141,15 @@
       for (let p = 0; p <= points; p++) {
         let angle = (p / points) * Math.PI * 2;
 
-        // WIGGLE with Perlin noise scaled by music
+        // Wiggle scaled by bass + ease
         const wiggle =
           noise(
             Math.cos(angle) * 5 + r.noiseOffset,
             Math.sin(angle) * 5 + r.noiseOffset,
           ) *
           15 *
-          ease;
+          ease *
+          (1 + bass * 2);
         let x = Math.cos(angle) * (currentRadius + wiggle);
         let y = Math.sin(angle) * (currentRadius + wiggle);
 
@@ -157,8 +158,8 @@
       }
       ctx.closePath();
 
-      // REDUCED GLOW
-      ctx.shadowBlur = 5;
+      // Slightly stronger glow
+      ctx.shadowBlur = 8; // was 5
       ctx.shadowColor = "#ffecdc";
       ctx.strokeStyle = "#ffecdc";
       ctx.lineWidth = 2 + bass * 1 * ease;
