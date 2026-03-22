@@ -45,7 +45,6 @@
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const source = audioCtx.createMediaElementSource(audio);
   const analyser = audioCtx.createAnalyser();
-
   source.connect(analyser);
   analyser.connect(audioCtx.destination);
 
@@ -85,16 +84,18 @@
     );
   }
 
-  // ===== CAMERA DRIFT (slower!) =====
+  // ===== CAMERA DRIFT (uniform speed) =====
   let driftX = 0;
   let driftY = 0;
+  const driftSpeedX = 0.0003;
+  const driftSpeedY = 0.0002;
 
   // ===== CIRCLE ROTATION (radio tuning) =====
   let rotation = 0;
-  const rotationSpeed = 0.00005; // slow
+  const rotationSpeed = 0.00005;
 
   // ===== SMOOTHING FUNCTION =====
-  function smoothArray(arr, smoothing = 4) {
+  function smoothArray(arr, smoothing = 6) {
     const smoothed = [];
     for (let i = 0; i < arr.length; i++) {
       let sum = 0;
@@ -107,68 +108,67 @@
     return smoothed;
   }
 
-  function draw(time) {
+  // ===== TOPOGRAPHIC BAND OFFSETS =====
+  const bandOffsets = Array.from({ length: 20 }, () => Math.random() * 1000);
+
+  function draw() {
     requestAnimationFrame(draw);
 
-    // TIME-DOMAIN DATA
     analyser.getByteTimeDomainData(data);
-
-    // smooth waveform to avoid spikes
     let waveform = smoothArray(data, 6);
 
     ctx.clearRect(0, 0, w, h);
-
-    // background
     ctx.fillStyle = "#0a0a12";
     ctx.fillRect(0, 0, w, h);
 
-    // slow drift
-    driftX += 0.000005 * time; // much slower
-    driftY += 0.000004 * time;
+    // uniform slow drift
+    driftX += driftSpeedX;
+    driftY += driftSpeedY;
 
-    // ===== TOPO LINES =====
-    const lines = 30;
-    for (let l = 0; l < lines; l++) {
+    // ===== ORGANIC TOPOGRAPHIC BACKGROUND =====
+    const bands = 20;
+    for (let b = 0; b < bands; b++) {
       ctx.beginPath();
-      for (let x = 0; x < w; x += 6) {
-        let nx = x * 0.002 + driftX;
-        let ny = l * 0.1 + driftY;
-        let y = (h / lines) * l + noise(nx, ny) * 60;
+      const offset = bandOffsets[b];
+      for (let x = 0; x < w; x += 8) {
+        let nx = x * 0.002 + driftX + offset;
+        let ny = b * 0.1 + driftY;
+        // make curves more organic with multiple layers of noise
+        let y =
+          h * 0.1 +
+          h * 0.7 * (b / bands) +
+          noise(nx, ny) * 50 +
+          Math.sin(x * 0.01 + offset) * 10;
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
-      ctx.strokeStyle = colors[l % colors.length] + "22";
+      ctx.strokeStyle = colors[b % colors.length] + "22";
       ctx.lineWidth = 1;
       ctx.stroke();
     }
 
     // ===== SMOOTH CIRCULAR WAVEFORM =====
     const radius = Math.min(w, h) * 0.22;
-
     ctx.beginPath();
     const totalPoints = waveform.length;
     for (let i = 0; i <= totalPoints; i++) {
       let t = i / totalPoints;
       let idx = i % totalPoints;
-      let v = (waveform[idx] - 128) / 128; // normalized
-
-      // apply rotation
+      let v = (waveform[idx] - 128) / 128;
       let angle = t * Math.PI * 2 + rotation;
       let r = radius + v * 80;
-
       let x = cx + Math.cos(angle) * r;
       let y = cy + Math.sin(angle) * r;
-
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
     ctx.closePath();
 
-    // glow
-    ctx.shadowBlur = 20;
+    // ===== ENHANCED GLOW =====
+    ctx.shadowBlur = 40; // stronger glow
     ctx.shadowColor = "#C2B0C9";
     ctx.strokeStyle = "#F4EFD2";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
     ctx.shadowBlur = 0;
 
@@ -186,8 +186,8 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    // increment rotation for tuning effect
-    rotation += rotationSpeed * time;
+    // rotation
+    rotation += rotationSpeed;
   }
 
   draw(0);
