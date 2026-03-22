@@ -1,7 +1,8 @@
 <html>
   <head> </head>
 
-  <body>
+  <body
+    ><canvas id="visualizer"></canvas>
     <audio controls src="/music.mp3"></audio>
   </body>
 </html>
@@ -19,36 +20,31 @@
     inset: 0;
     z-index: -1;
   }
-
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(
-      circle at center,
-      transparent 40%,
-      rgba(0, 0, 0, 0.4)
-    );
-    pointer-events: none;
-  }
 </style>
-
-<canvas id="visualizer"></canvas>
-<div class="overlay"></div>
 
 <script client:load>
   const canvas = document.getElementById("visualizer");
   const ctx = canvas.getContext("2d");
 
-  let width, height;
+  let w, h;
   function resize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
   }
   resize();
   window.addEventListener("resize", resize);
 
+  // 🎨 COLOR PALETTE (matched vibe)
+  const colors = [
+    "#594097", // deep violet
+    "#734BA1", // purple
+    "#C2B0C9", // dusty lavender
+    "#F4EFD2", // warm cream
+    "#55576C", // muted gray-blue
+  ];
+
   // AUDIO SETUP
-  const audio = document.querySelector("audio"); // uses your existing player
+  const audio = document.querySelector("audio");
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const source = audioCtx.createMediaElementSource(audio);
   const analyser = audioCtx.createAnalyser();
@@ -57,61 +53,52 @@
   analyser.connect(audioCtx.destination);
 
   analyser.fftSize = 256;
-  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  const data = new Uint8Array(analyser.frequencyBinCount);
 
-  // PARTICLES
-  const particles = Array.from({ length: 80 }).map(() => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    size: Math.random() * 2 + 0.5,
-    speed: Math.random() * 0.5 + 0.2,
+  // 🌊 BLOBS
+  let blobs = Array.from({ length: 6 }).map((_, i) => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: 150 + Math.random() * 200,
+    color: colors[i % colors.length],
+    offset: Math.random() * 1000,
   }));
 
-  function draw() {
+  function draw(time) {
     requestAnimationFrame(draw);
 
-    analyser.getByteFrequencyData(dataArray);
+    analyser.getByteFrequencyData(data);
 
-    let avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-    let bass = dataArray.slice(0, 10).reduce((a, b) => a + b, 0) / 10;
+    let avg = data.reduce((a, b) => a + b, 0) / data.length;
+    let bass = data.slice(0, 10).reduce((a, b) => a + b, 0) / 10;
 
-    // BACKGROUND GRADIENT
-    let hue = avg * 2;
-    let glow = bass / 255;
+    // subtle fade (trail effect)
+    ctx.fillStyle = "rgba(10,10,15,0.15)";
+    ctx.fillRect(0, 0, w, h);
 
-    const gradient = ctx.createRadialGradient(
-      width / 2,
-      height / 2,
-      0,
-      width / 2,
-      height / 2,
-      width,
-    );
+    blobs.forEach((b, i) => {
+      let pulse = bass * 0.8;
 
-    gradient.addColorStop(0, `hsla(${hue}, 70%, ${30 + glow * 20}%, 1)`);
-    gradient.addColorStop(1, `hsla(${hue + 60}, 70%, 10%, 1)`);
+      let x = b.x + Math.sin(time * 0.0005 + b.offset) * 50;
+      let y = b.y + Math.cos(time * 0.0004 + b.offset) * 50;
 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+      let radius = b.r + pulse;
 
-    // PARTICLES
-    particles.forEach((p) => {
-      p.y -= p.speed + glow * 2;
-      if (p.y < 0) {
-        p.y = height;
-        p.x = Math.random() * width;
-      }
+      let gradient = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius);
+
+      gradient.addColorStop(0, b.color + "AA");
+      gradient.addColorStop(1, b.color + "00");
 
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size + glow * 3, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${hue}, 80%, 70%, 0.6)`;
+      ctx.fillStyle = gradient;
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
     });
   }
 
-  draw();
+  draw(0);
 
-  // REQUIRED for autoplay policies
+  // required for autoplay rules
   audio.addEventListener("play", () => {
     audioCtx.resume();
   });
