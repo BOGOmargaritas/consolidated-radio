@@ -1,19 +1,10 @@
 <html>
   <head>
     <meta name="theme-color" content="#000000" />
-    <link
-      rel="icon"
-      type="image/png"
-      href="/favicon/favicon-96x96.png"
-      sizes="96x96"
-    />
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
     <link rel="shortcut icon" href="/favicon/favicon.ico" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/favicon/apple-touch-icon.png"
-    />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
     <link rel="manifest" href="/favicon/site.webmanifest" />
   </head>
 
@@ -24,7 +15,8 @@
       playsinline
       webkit-playsinline
       src="/music.mp3"
-      type="audio/mpeg"></audio>
+      type="audio/mpeg"
+    ></audio>
     <div class="logo">
       <img src="/badgeicon-cream.png" />
     </div>
@@ -86,35 +78,44 @@
   resize();
   window.addEventListener("resize", resize);
 
-  // ── AUDIO CONTEXT (created/destroyed based on visibility) ─────
-  let audioCtx = null;
-  let source = null;
+  // ── AUDIO SETUP ───────────────────────────────────────────────
+  // We use captureStream() so the audio element is NEVER routed through
+  // AudioContext — iOS treats it as a plain <audio> element and allows
+  // background playback. The analyser just "listens" without intercepting.
   let analyser = null;
   let freqData = null;
+  let visualizerReady = false;
 
-  function setupAudioContext() {
-    if (audioCtx) return; // already set up
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    source = audioCtx.createMediaElementSource(audio);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 512;
-    freqData = new Uint8Array(analyser.frequencyBinCount);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    audioCtx.resume();
-  }
-
-  function teardownAudioContext() {
-    if (!audioCtx) return;
+  function setupVisualizer() {
+    if (visualizerReady) return;
     try {
-      source.disconnect();
-      analyser.disconnect();
-      audioCtx.close();
-    } catch (e) {}
-    audioCtx = null;
-    source = null;
-    analyser = null;
-    freqData = null;
+      const stream = audio.captureStream
+        ? audio.captureStream()
+        : audio.mozCaptureStream
+        ? audio.mozCaptureStream()
+        : null;
+
+      if (!stream) {
+        // captureStream not supported (e.g. iOS Safari) — visualizer
+        // will just idle, but audio plays fine in the background
+        console.warn("captureStream not supported, visualizer disabled");
+        return;
+      }
+
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+
+      // IMPORTANT: source → analyser only, NOT to destination
+      // The <audio> element handles its own output independently
+      source.connect(analyser);
+
+      visualizerReady = true;
+    } catch (e) {
+      console.warn("Visualizer setup failed:", e);
+    }
   }
 
   // ── MEDIA SESSION ─────────────────────────────────────────────
@@ -139,29 +140,15 @@
     });
   }
 
-  // ── VISIBILITY: tear down AudioContext when leaving ───────────
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
-      teardownAudioContext();
-    } else {
-      if (playing) setupAudioContext();
-    }
-  });
-
   // ── PLAY STATE ────────────────────────────────────────────────
   let playing = false;
 
   audio.addEventListener("play", () => {
-    setupAudioContext();
+    setupVisualizer();
     playing = true;
   });
   audio.addEventListener("pause", () => (playing = false));
   audio.addEventListener("ended", () => (playing = false));
-
-  // Resume on touch
-  document.addEventListener("touchstart", () => {
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-  });
 
   // ── PERLIN NOISE ──────────────────────────────────────────────
   let perm = new Uint8Array(512);
@@ -169,29 +156,21 @@
   perm.sort(() => Math.random() - 0.5);
   for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
 
-  function fade(t) {
-    return t * t * t * (t * (t * 6 - 15) + 10);
-  }
-  function lerp(a, b, t) {
-    return a + (b - a) * t;
-  }
+  function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
   function grad(hash, x, y) {
     const h = hash & 3;
     return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
   }
   function noise(x, y) {
-    let X = Math.floor(x) & 255,
-      Y = Math.floor(y) & 255;
-    x -= Math.floor(x);
-    y -= Math.floor(y);
-    let u = fade(x),
-      v = fade(y);
-    let a = perm[X] + Y,
-      b = perm[X + 1] + Y;
+    let X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+    x -= Math.floor(x); y -= Math.floor(y);
+    let u = fade(x), v = fade(y);
+    let a = perm[X] + Y, b = perm[X + 1] + Y;
     return lerp(
-      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+      lerp(grad(perm[a], x, y),         grad(perm[b], x - 1, y),         u),
       lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
-      v,
+      v
     );
   }
 
@@ -212,20 +191,16 @@
   function draw() {
     requestAnimationFrame(draw);
 
-    // If no analyser (backgrounded), just fade to black and idle
-    const bass =
-      analyser && freqData
-        ? (analyser.getByteFrequencyData(freqData),
-          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
-            (freqData.length / 4) /
-            255)
-        : 0;
-    const treble =
-      analyser && freqData
-        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
-          ((freqData.length * 3) / 4) /
-          255
-        : 0;
+    let bass = 0, treble = 0;
+    if (analyser && freqData) {
+      analyser.getByteFrequencyData(freqData);
+      bass =
+        freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
+        (freqData.length / 4) / 255;
+      treble =
+        freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
+        ((freqData.length * 3) / 4) / 255;
+    }
 
     ease = lerp(ease, playing ? 1 : 0, easeSpeed);
 
@@ -249,11 +224,8 @@
         const wiggle =
           noise(
             Math.cos(angle) * 5 + r.noiseOffset + time,
-            Math.sin(angle) * 5 + r.noiseOffset + time,
-          ) *
-          15 *
-          ease *
-          (1 + treble * 0.5 * r.trebleFactor);
+            Math.sin(angle) * 5 + r.noiseOffset + time
+          ) * 15 * ease * (1 + treble * 0.5 * r.trebleFactor);
 
         const x = Math.cos(angle) * (currentRadius + wiggle);
         const y = Math.sin(angle) * (currentRadius + wiggle);
