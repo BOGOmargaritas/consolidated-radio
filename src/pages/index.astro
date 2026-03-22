@@ -256,4 +256,20 @@
     },
     { once: false },
   );
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      // Disconnect visualizer pipeline so iOS treats it as plain audio
+      source.disconnect();
+      analyser.disconnect();
+      source.connect(audioCtx.destination); // connect directly
+    } else {
+      // Reconnect visualizer when back in foreground
+      source.disconnect();
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+    }
+  });
 </script>
+
+<script></script>
