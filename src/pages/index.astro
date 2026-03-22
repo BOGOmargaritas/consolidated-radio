@@ -140,11 +140,17 @@
   }
 
   // ── VISIBILITY: tear down AudioContext when leaving ───────────
+  let wasPlaying = false;
+
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
+      wasPlaying = playing;
       teardownAudioContext();
     } else {
-      if (playing) setupAudioContext();
+      if (wasPlaying) {
+        setupAudioContext();
+        audio.play();
+      }
     }
   });
 
