@@ -83,7 +83,7 @@
   const ringCount = 6;
   const rings = Array.from({ length: ringCount }, (_, i) => ({
     radius: (i + 1) * 40,
-    speed: 0.002 + i * 0.001, // rotation speed
+    speed: 0.002 + i * 0.001,
     rotation: Math.random() * Math.PI * 2,
     noiseOffset: Math.random() * 1000,
   }));
@@ -129,10 +129,8 @@
 
     // DRAW RINGS
     rings.forEach((r, i) => {
-      // subtle rotation + treble influence
       r.rotation += (r.speed + treble * 0.005) * ease;
 
-      // radius expansion with bass + ease
       const currentRadius = r.radius + bass * 100 * ease;
 
       ctx.save();
@@ -144,24 +142,29 @@
       for (let p = 0; p <= points; p++) {
         let angle = (p / points) * Math.PI * 2;
 
-        // PERLIN-NOISE WOBBLE
         const wobble =
           noise(
             Math.cos(angle) * 5 + r.noiseOffset,
             Math.sin(angle) * 5 + r.noiseOffset,
           ) * 15;
-        let x = Math.cos(angle) * (currentRadius + wobble);
-        let y = Math.sin(angle) * (currentRadius + wobble);
+
+        // signal trace along ring
+        const signal =
+          (freqData[Math.floor((p / points) * freqData.length)] / 255) * 20;
+        let x = Math.cos(angle) * (currentRadius + wobble + signal);
+        let y = Math.sin(angle) * (currentRadius + wobble + signal);
+
         if (p === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
       ctx.closePath();
 
-      // radial glow
-      ctx.shadowBlur = 20 + bass * 40 * ease;
-      ctx.shadowColor = "white";
-      ctx.strokeStyle = "rgba(255,255,255,0.6)";
-      ctx.lineWidth = 2 + bass * 2 * ease;
+      // reduced glow
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = "#ffecdc";
+
+      ctx.strokeStyle = "#ffecdc";
+      ctx.lineWidth = 2 + bass * 1 * ease;
       ctx.stroke();
       ctx.shadowBlur = 0;
 
