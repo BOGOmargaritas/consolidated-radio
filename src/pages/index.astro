@@ -22,9 +22,9 @@
     <audio
       controls
       playsinline
+      webkit-playsinline
       src="/music.mp3"
-      type="audio/mpeg"
-      webkit-playsinline></audio>
+      type="audio/mpeg"></audio>
     <div class="logo">
       <img src="/badgeicon-cream.png" />
     </div>
@@ -242,6 +242,18 @@
     navigator.mediaSession.metadata = new MediaMetadata({
       title: "Consolidated Radio",
       artist: "Live Stream",
+      album: "",
+      artwork: [
+        {
+          src: "https://consolidated.radio/badgeicon-cream.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+      ],
     });
+
+    // These handlers keep the session "alive" on iOS
+    navigator.mediaSession.setActionHandler("play", () => audio.play());
+    navigator.mediaSession.setActionHandler("pause", () => audio.pause());
   }
 </script>
