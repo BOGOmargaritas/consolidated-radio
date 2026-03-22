@@ -231,3 +231,25 @@
 
   draw();
 </script>
+
+<script>
+  const audio = document.getElementById("myAudio");
+
+  // Enable autoplay on user interaction
+  document.body.addEventListener(
+    "click",
+    () => {
+      if (audio.paused) {
+        audio.play().catch((e) => console.log("Playback error:", e));
+      }
+    },
+    { once: true },
+  );
+
+  // Optional: Keep audio playing after page visibility changes
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && audio.paused) {
+      audio.play().catch((e) => console.log("Playback error:", e));
+    }
+  });
+</script>
