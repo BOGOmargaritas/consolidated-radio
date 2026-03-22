@@ -1,0 +1,133 @@
+<html>
+  <head> </head>
+
+  <body
+    ><canvas id="visualizer"></canvas>
+    <audio controls src="/music.mp3"></audio>
+  </body>
+</html>
+
+<style>
+  body {
+    overflow: hidden; /* Hides both horizontal and vertical scrollbars and stops scrolling */
+    height: 100%; /* Ensures the body takes up the full initial height of the viewport */
+    margin: 0; /* Removes default browser margins */
+    padding: 0; /* Removes default padding */
+  }
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: #0b0b14;
+  }
+</style>
+
+<script client:load>
+  const canvas = document.getElementById("visualizer");
+  const ctx = canvas.getContext("2d");
+
+  let w, h, cx, cy;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    cx = w / 2;
+    cy = h / 2;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // AUDIO SETUP
+  const audio = document.querySelector("audio");
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioCtx.createMediaElementSource(audio);
+  const analyser = audioCtx.createAnalyser();
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  analyser.fftSize = 512;
+  const bufferLength = analyser.frequencyBinCount;
+  const data = new Uint8Array(bufferLength);
+
+  // PARTICLE-LIKE LAYERS
+  const layers = [];
+  const layerCount = 15;
+  for (let i = 0; i < layerCount; i++) {
+    layers.push({
+      xOffset: Math.random() * 1000,
+      yOffset: Math.random() * 1000,
+      speed: 0.0002 + i * 0.00005,
+      amplitude: Math.random() * 20 + 20,
+      color: `hsla(${220 + i * 8}, 50%, 60%, 0.15)`,
+    });
+  }
+
+  // PERLIN NOISE
+  let perm = new Uint8Array(512);
+  for (let i = 0; i < 256; i++) perm[i] = i;
+  perm.sort(() => Math.random() - 0.5);
+  for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+  function fade(t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+  function lerp(a, b, t) {
+    return a + t * (b - a);
+  }
+  function grad(hash, x, y) {
+    const h = hash & 3;
+    return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
+  }
+  function noise(x, y) {
+    let X = Math.floor(x) & 255,
+      Y = Math.floor(y) & 255;
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    let u = fade(x),
+      v = fade(y);
+    let a = perm[X] + Y,
+      b = perm[X + 1] + Y;
+    return lerp(
+      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+      v,
+    );
+  }
+
+  // DRAW FUNCTION
+  function draw() {
+    requestAnimationFrame(draw);
+
+    analyser.getByteFrequencyData(data);
+    let avgAmp = data.reduce((a, b) => a + b) / data.length / 255;
+
+    // fade background slightly for trailing effect
+    ctx.fillStyle = "rgba(11,11,20,0.15)";
+    ctx.fillRect(0, 0, w, h);
+
+    // DRAW LAYERS
+    layers.forEach((layer, i) => {
+      ctx.beginPath();
+      for (let x = 0; x < w; x += 5) {
+        let y =
+          h * 0.5 +
+          Math.sin(x * 0.01 + layer.xOffset) * layer.amplitude +
+          noise(x * 0.005 + layer.xOffset, layer.yOffset) * layer.amplitude;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      layer.xOffset += layer.speed + avgAmp * 0.002; // audio-reactive drift
+      ctx.strokeStyle = layer.color;
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 20 * avgAmp + 10; // glow pulsates with music
+      ctx.shadowColor = "#9e81ff";
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    });
+  }
+
+  audio.addEventListener("play", () => {
+    audioCtx.resume();
+  });
+
+  draw();
+</script>
