@@ -23,7 +23,7 @@
 
   .logo img {
     position: absolute;
-    top: 15%; /* Moves the top edge to the vertical center */
+    top: 13%; /* Moves the top edge to the vertical center */
     transform: translateY(-50%); /* Pulls the image up by half its own height */
     /* To also center horizontally, add: */
     left: 50%;
@@ -113,6 +113,7 @@
     speed: 0.002 + i * 0.001,
     rotation: Math.random() * Math.PI * 2,
     noiseOffset: Math.random() * 1000,
+    trebleFactor: 1 - i * 0.1, // inner rings = higher sensitivity
   }));
 
   // EASE VARIABLES
@@ -161,7 +162,7 @@
     if (playing) time += 0.01;
 
     // DRAW RINGS
-    rings.forEach((r) => {
+    rings.forEach((r, i) => {
       r.rotation += (r.speed + treble * 0.005) * ease;
       const currentRadius = r.radius + bass * 100 * ease;
 
@@ -174,7 +175,7 @@
       for (let p = 0; p <= points; p++) {
         let angle = (p / points) * Math.PI * 2;
 
-        // Flowing wiggle using time + subtle treble scaling
+        // Flowing wiggle using time + ring-specific treble scaling
         const wiggle =
           noise(
             Math.cos(angle) * 5 + r.noiseOffset + time,
@@ -182,7 +183,7 @@
           ) *
           15 *
           ease *
-          (1 + treble * 0.5); // subtle treble influence
+          (1 + treble * 0.5 * r.trebleFactor);
 
         let x = Math.cos(angle) * (currentRadius + wiggle);
         let y = Math.sin(angle) * (currentRadius + wiggle);
