@@ -74,6 +74,7 @@
   // ── CANVAS SETUP ──────────────────────────────────────────────
   const canvas = document.getElementById("visualizer");
   const ctx = canvas.getContext("2d");
+  const audio = document.querySelector("audio");
 
   let w, h, cx, cy;
   function resize() {
@@ -85,20 +86,38 @@
   resize();
   window.addEventListener("resize", resize);
 
-  // ── AUDIO SETUP ───────────────────────────────────────────────
-  const audio = document.querySelector("audio");
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const source = audioCtx.createMediaElementSource(audio);
-  const analyser = audioCtx.createAnalyser();
+  // ── AUDIO CONTEXT (created/destroyed based on visibility) ─────
+  let audioCtx = null;
+  let source = null;
+  let analyser = null;
+  let freqData = null;
 
-  // Start with visualizer connected
-  source.connect(analyser);
-  analyser.connect(audioCtx.destination);
+  function setupAudioContext() {
+    if (audioCtx) return; // already set up
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    source = audioCtx.createMediaElementSource(audio);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    freqData = new Uint8Array(analyser.frequencyBinCount);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    audioCtx.resume();
+  }
 
-  analyser.fftSize = 512;
-  const freqData = new Uint8Array(analyser.frequencyBinCount);
+  function teardownAudioContext() {
+    if (!audioCtx) return;
+    try {
+      source.disconnect();
+      analyser.disconnect();
+      audioCtx.close();
+    } catch (e) {}
+    audioCtx = null;
+    source = null;
+    analyser = null;
+    freqData = null;
+  }
 
-  // ── MEDIA SESSION (lock screen controls) ─────────────────────
+  // ── MEDIA SESSION ─────────────────────────────────────────────
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: "Consolidated Radio",
@@ -112,7 +131,6 @@
         },
       ],
     });
-
     navigator.mediaSession.setActionHandler("play", () => audio.play());
     navigator.mediaSession.setActionHandler("pause", () => audio.pause());
     navigator.mediaSession.setActionHandler("stop", () => {
@@ -121,38 +139,29 @@
     });
   }
 
-  // ── IOS BACKGROUND AUDIO FIX ──────────────────────────────────
-  // When hidden: bypass the AudioContext so iOS plays it as plain audio
-  // When visible: reconnect the visualizer
+  // ── VISIBILITY: tear down AudioContext when leaving ───────────
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
-      source.disconnect();
-      analyser.disconnect();
-      source.connect(audioCtx.destination);
+      teardownAudioContext();
     } else {
-      source.disconnect();
-      source.connect(analyser);
-      analyser.connect(audioCtx.destination);
-      if (audioCtx.state === "suspended") {
-        audioCtx.resume();
-      }
+      if (playing) setupAudioContext();
     }
-  });
-
-  // Resume AudioContext on touch (iOS requires user gesture)
-  document.addEventListener("touchstart", () => {
-    if (audioCtx.state === "suspended") audioCtx.resume();
   });
 
   // ── PLAY STATE ────────────────────────────────────────────────
   let playing = false;
 
   audio.addEventListener("play", () => {
-    audioCtx.resume();
+    setupAudioContext();
     playing = true;
   });
   audio.addEventListener("pause", () => (playing = false));
   audio.addEventListener("ended", () => (playing = false));
+
+  // Resume on touch
+  document.addEventListener("touchstart", () => {
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  });
 
   // ── PERLIN NOISE ──────────────────────────────────────────────
   let perm = new Uint8Array(512);
@@ -202,16 +211,21 @@
   // ── DRAW LOOP ─────────────────────────────────────────────────
   function draw() {
     requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(freqData);
 
+    // If no analyser (backgrounded), just fade to black and idle
     const bass =
-      freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
-      (freqData.length / 4) /
-      255;
+      analyser && freqData
+        ? (analyser.getByteFrequencyData(freqData),
+          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
+            (freqData.length / 4) /
+            255)
+        : 0;
     const treble =
-      freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
-      ((freqData.length * 3) / 4) /
-      255;
+      analyser && freqData
+        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
+          ((freqData.length * 3) / 4) /
+          255
+        : 0;
 
     ease = lerp(ease, playing ? 1 : 0, easeSpeed);
 
