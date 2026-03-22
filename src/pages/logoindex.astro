@@ -1,0 +1,97 @@
+<html>
+  <head>
+	<meta name="theme-color" content="#000000" />
+	<link
+	  rel="icon"
+	  type="image/png"
+	  href="/favicon/favicon-96x96.png"
+	  sizes="96x96"
+	/>
+	<link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+	<link rel="shortcut icon" href="/favicon/favicon.ico" />
+	<link
+	  rel="apple-touch-icon"
+	  sizes="180x180"
+	  href="/favicon/apple-touch-icon.png"
+	/>
+	<link rel="manifest" href="/favicon/site.webmanifest" />
+  </head>
+
+  ---
+
+  <body>
+	<div class="logo">
+	  <img src="/badgeicon-cream.png"/>
+	</div>
+  </body>
+</html>
+
+---
+
+<style>
+	body {
+	  background-color: black;
+	  overflow: hidden; /* Hides both horizontal and vertical scrollbars and stops scrolling */
+	  height: 100%; /* Ensures the body takes up the full initial height of the viewport */
+	  margin: 0; /* Removes default browser margins */
+	  padding: 0; /* Removes default padding */
+	}
+
+	.logo {
+	}
+
+	.logo img {
+	  position: absolute;
+	  top: 50%; /* Moves the top edge to the vertical center */
+	  transform: translateY(-50%); /* Pulls the image up by half its own height */
+	  /* To also center horizontally, add: */
+	  left: 50%;
+	  transform: translate(-50%, -50%);
+	  height: 30%;
+	}
+
+	  /* Standard property */
+	  user-select: none;
+	  /* Vendor prefixes for cross-browser compatibility */
+	  -webkit-user-select: none; /* Safari, Chrome */
+	  -moz-user-select: none; /* Firefox */
+	  -ms-user-select: none; /* Internet Explorer/Edge */
+
+	  /* Prevents dragging */
+	  -webkit-user-drag: none; /* Safari, Chrome */
+	  user-drag: none; /* Standard property */
+	}
+
+	/* --- Media query for screens narrower than 600px (mobile) --- */
+	@media screen and (max-width: 1300px) {
+
+  head{
+	  display: none;
+   background-color: black;
+  }
+
+	body{
+	 overflow: auto;
+	}
+
+   .logo {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 100%;
+   }
+
+   .logo img {
+
+	 /* Standard property */
+	 user-select: none;
+	 /* Vendor prefixes for cross-browser compatibility */
+	 -webkit-user-select: none; /* Safari, Chrome */
+	 -moz-user-select: none; /* Firefox */
+	 -ms-user-select: none; /* Internet Explorer/Edge */
+
+	 /* Prevents dragging */
+	 -webkit-user-drag: none; /* Safari, Chrome */
+	 user-drag: none; /* Standard property */
+   }
+</style>
