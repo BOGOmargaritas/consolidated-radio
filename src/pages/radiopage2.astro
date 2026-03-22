@@ -53,6 +53,7 @@
   for (let i = 0; i < 256; i++) perm[i] = i;
   perm.sort(() => Math.random() - 0.5);
   for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
   function fade(t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
   }
@@ -93,6 +94,9 @@
   let ease = 0;
   const easeSpeed = 0.02;
 
+  // TIME VARIABLE FOR FLOWING WIGGLE
+  let time = 0;
+
   // AUDIO PLAY/PAUSE
   audio.addEventListener("play", () => {
     audioCtx.resume();
@@ -127,6 +131,9 @@
     ctx.fillStyle = "rgba(0,0,0,0.15)";
     ctx.fillRect(0, 0, w, h);
 
+    // increment time for flowing wiggle
+    if (playing) time += 0.01;
+
     // DRAW RINGS
     rings.forEach((r) => {
       r.rotation += (r.speed + treble * 0.005) * ease;
@@ -141,15 +148,15 @@
       for (let p = 0; p <= points; p++) {
         let angle = (p / points) * Math.PI * 2;
 
-        // Wiggle scaled by bass + ease
+        // Flowing wiggle using time
         const wiggle =
           noise(
-            Math.cos(angle) * 5 + r.noiseOffset,
-            Math.sin(angle) * 5 + r.noiseOffset,
+            Math.cos(angle) * 5 + r.noiseOffset + time,
+            Math.sin(angle) * 5 + r.noiseOffset + time,
           ) *
           15 *
-          ease *
-          (1 + bass * 2);
+          ease;
+
         let x = Math.cos(angle) * (currentRadius + wiggle);
         let y = Math.sin(angle) * (currentRadius + wiggle);
 
@@ -159,7 +166,7 @@
       ctx.closePath();
 
       // Slightly stronger glow
-      ctx.shadowBlur = 8; // was 5
+      ctx.shadowBlur = 8;
       ctx.shadowColor = "#ffecdc";
       ctx.strokeStyle = "#ffecdc";
       ctx.lineWidth = 2 + bass * 1 * ease;
