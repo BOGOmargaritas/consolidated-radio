@@ -37,7 +37,7 @@
   resize();
   window.addEventListener("resize", resize);
 
-  // AUDIO SETUP
+  // AUDIO
   const audio = document.querySelector("audio");
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const source = audioCtx.createMediaElementSource(audio);
@@ -48,25 +48,11 @@
   const bufferLength = analyser.frequencyBinCount;
   const data = new Uint8Array(bufferLength);
 
-  // PARTICLE-LIKE LAYERS
-  const layers = [];
-  const layerCount = 15;
-  for (let i = 0; i < layerCount; i++) {
-    layers.push({
-      xOffset: Math.random() * 1000,
-      yOffset: Math.random() * 1000,
-      speed: 0.0002 + i * 0.00005,
-      amplitude: Math.random() * 20 + 20,
-      color: `hsla(${220 + i * 8}, 50%, 60%, 0.15)`,
-    });
-  }
-
   // PERLIN NOISE
   let perm = new Uint8Array(512);
   for (let i = 0; i < 256; i++) perm[i] = i;
   perm.sort(() => Math.random() - 0.5);
   for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
-
   function fade(t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
   }
@@ -93,32 +79,51 @@
     );
   }
 
-  // DRAW FUNCTION
+  // LAYERS
+  const layers = [];
+  const layerCount = 15;
+  for (let i = 0; i < layerCount; i++) {
+    layers.push({
+      xOffset: Math.random() * 1000,
+      yOffset: Math.random() * 1000,
+      baseSpeed: 0.0002 + i * 0.00005,
+      amplitude: 20 + i * 3,
+      color: `hsla(${220 + i * 8}, 50%, 60%, 0.15)`,
+    });
+  }
+
+  // DRAW
   function draw() {
     requestAnimationFrame(draw);
 
     analyser.getByteFrequencyData(data);
-    let avgAmp = data.reduce((a, b) => a + b) / data.length / 255;
 
-    // fade background slightly for trailing effect
+    // average amplitude for global effects
+    const avgAmp = data.reduce((a, b) => a + b) / data.length / 255;
+
     ctx.fillStyle = "rgba(11,11,20,0.15)";
     ctx.fillRect(0, 0, w, h);
 
-    // DRAW LAYERS
     layers.forEach((layer, i) => {
       ctx.beginPath();
       for (let x = 0; x < w; x += 5) {
-        let y =
+        // pick a frequency index based on x position for variety
+        const freqIdx = Math.floor((x / w) * data.length);
+        const audioAmp = data[freqIdx] / 255; // 0..1
+        // vertical displacement: base amplitude + perlin + audio
+        const y =
           h * 0.5 +
           Math.sin(x * 0.01 + layer.xOffset) * layer.amplitude +
-          noise(x * 0.005 + layer.xOffset, layer.yOffset) * layer.amplitude;
+          noise(x * 0.005 + layer.xOffset, layer.yOffset) * layer.amplitude +
+          audioAmp * 100; // audio-driven deformation
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
-      layer.xOffset += layer.speed + avgAmp * 0.002; // audio-reactive drift
+      // update offset for slow drifting + audio reactive
+      layer.xOffset += layer.baseSpeed + avgAmp * 0.005;
       ctx.strokeStyle = layer.color;
       ctx.lineWidth = 2;
-      ctx.shadowBlur = 20 * avgAmp + 10; // glow pulsates with music
+      ctx.shadowBlur = 20 * avgAmp + 10; // pulsating glow
       ctx.shadowColor = "#9e81ff";
       ctx.stroke();
       ctx.shadowBlur = 0;
@@ -128,6 +133,5 @@
   audio.addEventListener("play", () => {
     audioCtx.resume();
   });
-
   draw();
 </script>
