@@ -17,10 +17,60 @@
     <link rel="manifest" href="/favicon/site.webmanifest" />
   </head>
 
-  <body
-    ><canvas id="visualizer"></canvas>
+  <body>
+    <canvas id="visualizer"></canvas>
     <button id="playBtn">Play Audio</button>
     <audio id="myAudio" controls src="/music.mp3" type="audio/mpeg"></audio>
+
+    <script>
+      const audio = document.getElementById("myAudio");
+      const btn = document.getElementById("playBtn");
+
+      // Function to start audio with MediaSession
+      async function startAudio() {
+        try {
+          await audio.play();
+          console.log("Audio started!");
+
+          // MediaSession for iOS background playback
+          if ("mediaSession" in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: "My Track",
+              artist: "Artist Name",
+              album: "Album Name",
+              artwork: [
+                { src: "cover.jpg", sizes: "512x512", type: "image/jpeg" },
+              ],
+            });
+
+            navigator.mediaSession.setActionHandler("play", () => audio.play());
+            navigator.mediaSession.setActionHandler("pause", () =>
+              audio.pause(),
+            );
+          }
+        } catch (err) {
+          console.log("Playback failed:", err);
+        }
+      }
+
+      // Start audio on user tap
+      btn.addEventListener("click", startAudio);
+
+      // Resume audio if page visibility changes
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && audio.paused) {
+          audio.play().catch((e) => console.log("Resume failed:", e));
+        }
+      });
+
+      // Optional: resume audio if page regains focus
+      window.addEventListener("focus", () => {
+        if (audio.paused) {
+          audio.play().catch((e) => console.log("Focus resume failed:", e));
+        }
+      });
+    </script>
+
     <div class="logo">
       <img src="/badgeicon-cream.png" />
     </div>
@@ -231,49 +281,4 @@
   }
 
   draw();
-</script>
-
-<script>
-  const audio = document.getElementById("myAudio");
-  const btn = document.getElementById("playBtn");
-
-  // Function to start audio with MediaSession
-  async function startAudio() {
-    try {
-      await audio.play();
-      console.log("Audio started!");
-
-      // MediaSession for iOS background playback
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: "My Track",
-          artist: "Artist Name",
-          album: "Album Name",
-          artwork: [{ src: "cover.jpg", sizes: "512x512", type: "image/jpeg" }],
-        });
-
-        navigator.mediaSession.setActionHandler("play", () => audio.play());
-        navigator.mediaSession.setActionHandler("pause", () => audio.pause());
-      }
-    } catch (err) {
-      console.log("Playback failed:", err);
-    }
-  }
-
-  // Start audio on user tap
-  btn.addEventListener("click", startAudio);
-
-  // Resume audio if page visibility changes
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && audio.paused) {
-      audio.play().catch((e) => console.log("Resume failed:", e));
-    }
-  });
-
-  // Optional: resume audio if page regains focus
-  window.addEventListener("focus", () => {
-    if (audio.paused) {
-      audio.play().catch((e) => console.log("Focus resume failed:", e));
-    }
-  });
 </script>
