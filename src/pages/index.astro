@@ -15,6 +15,12 @@
       href="/favicon/apple-touch-icon.png"
     />
     <link rel="manifest" href="/favicon/site.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="HP Audiobook" />
   </head>
 
   <body
@@ -242,14 +248,11 @@
   const audio = document.getElementById("audioPlayer");
   const playBtn = document.getElementById("playBtn");
 
-  // Start audio on user interaction
   playBtn.addEventListener("click", async () => {
     try {
       await audio.play();
-      console.log("Audio started!");
-      playBtn.disabled = true; // optional: disable button once playing
+      playBtn.disabled = true;
 
-      // Optional: use MediaSession API for iOS lock screen controls
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: "Harry Potter: Chamber of Secrets",
@@ -265,7 +268,7 @@
     }
   });
 
-  // Optional: resume audio if visibility changes
+  // Resume audio if tab becomes visible
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && audio.paused) {
       audio.play().catch((e) => console.log("Resume failed:", e));
