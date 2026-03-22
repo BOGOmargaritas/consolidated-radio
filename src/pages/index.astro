@@ -19,8 +19,7 @@
 
   <body
     ><canvas id="visualizer"></canvas>
-    <audio controls playsinline src="https://icecast.somafm.com/groovesalad"
-    ></audio>
+    <audio controls playsinline></audio>
     <div class="logo">
       <img src="/badgeicon-cream.png" />
     </div>
@@ -231,4 +230,50 @@
   }
 
   draw();
+</script>
+
+<script>
+  const audio = document.getElementById("audio");
+
+  // Your playlist
+  const tracks = ["/music.mp3"];
+
+  let current = 0;
+
+  // preload next track
+  let nextAudio = new Audio();
+  nextAudio.preload = "auto";
+
+  function loadTrack(index) {
+    audio.src = tracks[index];
+    nextAudio.src = tracks[(index + 1) % tracks.length];
+  }
+
+  // start
+  loadTrack(current);
+
+  // must be triggered by user gesture
+  audio.addEventListener("play", () => {
+    audio.play().catch(() => {});
+  });
+
+  // 🔥 seamless switching BEFORE end
+  audio.addEventListener("timeupdate", () => {
+    if (!audio.duration) return;
+
+    const timeLeft = audio.duration - audio.currentTime;
+
+    // switch ~0.5s before ending
+    if (timeLeft < 0.5) {
+      current = (current + 1) % tracks.length;
+
+      // swap instantly
+      audio.src = tracks[current];
+      audio.currentTime = 0;
+      audio.play();
+
+      // preload next
+      nextAudio.src = tracks[(current + 1) % tracks.length];
+    }
+  });
 </script>
