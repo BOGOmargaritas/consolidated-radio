@@ -1,0 +1,210 @@
+<html>
+  <head> </head>
+
+  <body
+    ><canvas id="visualizer"></canvas>
+    <audio controls src="/music.mp3"></audio>
+  </body>
+</html>
+
+<style>
+  body {
+    overflow: hidden; /* Hides both horizontal and vertical scrollbars and stops scrolling */
+    height: 100%; /* Ensures the body takes up the full initial height of the viewport */
+    margin: 0; /* Removes default browser margins */
+    padding: 0; /* Removes default padding */
+  }
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+  }
+</style>
+
+<script client:load>
+  const canvas = document.getElementById("visualizer");
+  const ctx = canvas.getContext("2d");
+
+  let w, h, cx, cy;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    cx = w / 2;
+    cy = h / 2;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  const colors = ["#594097", "#734BA1", "#C2B0C9", "#F4EFD2", "#55576C"];
+
+  const audio = document.querySelector("audio");
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioCtx.createMediaElementSource(audio);
+  const analyser = audioCtx.createAnalyser();
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  analyser.fftSize = 1024;
+  const bufferLength = analyser.fftSize;
+  const data = new Uint8Array(bufferLength);
+
+  // PERLIN NOISE
+  let perm = new Uint8Array(512);
+  for (let i = 0; i < 256; i++) perm[i] = i;
+  perm.sort(() => Math.random() - 0.5);
+  for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+  function fade(t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+  function lerp(a, b, t) {
+    return a + t * (b - a);
+  }
+  function grad(hash, x, y) {
+    const h = hash & 3;
+    return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
+  }
+  function noise(x, y) {
+    let X = Math.floor(x) & 255,
+      Y = Math.floor(y) & 255;
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    let u = fade(x),
+      v = fade(y);
+    let a = perm[X] + Y,
+      b = perm[X + 1] + Y;
+    return lerp(
+      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+      v,
+    );
+  }
+
+  // SMOOTHING
+  function smoothArray(arr, s = 6) {
+    const out = [];
+    for (let i = 0; i < arr.length; i++) {
+      let sum = 0;
+      for (let j = -s; j <= s; j++) {
+        let idx = (i + j + arr.length) % arr.length;
+        sum += arr[idx];
+      }
+      out.push(sum / (s * 2 + 1));
+    }
+    return out;
+  }
+
+  // TOPOGRAPHIC BAND OFFSETS
+  const bandOffsets = Array.from({ length: 20 }, () => Math.random() * 1000);
+
+  // ANIMATION VARIABLES
+  let driftX = 0,
+    driftY = 0;
+  let rotation = 0;
+  let rotationTarget = 0;
+  let playing = false;
+  let ease = 0;
+  const easeSpeed = 0.02;
+
+  // SPEED SETTINGS
+  const rotationSpeed = 0.000006; // very slow absolute rotation per frame
+  const driftSpeedX = 0.0006; // 100% faster
+  const driftSpeedY = 0.0004;
+
+  // AUDIO PLAY/PAUSE HANDLERS
+  audio.addEventListener("play", () => {
+    audioCtx.resume();
+    playing = true;
+  });
+  audio.addEventListener("pause", () => {
+    playing = false;
+  });
+  audio.addEventListener("ended", () => {
+    playing = false;
+  });
+
+  function draw() {
+    requestAnimationFrame(draw);
+
+    analyser.getByteTimeDomainData(data);
+    let waveform = smoothArray(data, 6);
+
+    // EASE
+    ease = lerp(ease, playing ? 1 : 0, easeSpeed);
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#0a0a12";
+    ctx.fillRect(0, 0, w, h);
+
+    // ===== BACKGROUND =====
+    const bands = 20;
+    for (let b = 0; b < bands; b++) {
+      ctx.beginPath();
+      const offset = bandOffsets[b];
+      for (let x = 0; x < w; x += 8) {
+        let nx = x * 0.002 + driftX + offset;
+        let ny = b * 0.1 + driftY;
+        let y =
+          h * 0.1 +
+          h * 0.7 * (b / bands) +
+          noise(nx, ny) * 50 +
+          Math.sin(x * 0.01 + offset) * 10;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = colors[b % colors.length] + "22";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Apply drift only when playing (ease scales delta)
+    driftX += driftSpeedX * ease;
+    driftY += driftSpeedY * ease;
+
+    // ===== CIRCULAR WAVEFORM =====
+    const radius = Math.min(w, h) * 0.22;
+    ctx.beginPath();
+    const totalPoints = waveform.length;
+    for (let i = 0; i <= totalPoints; i++) {
+      let t = i / totalPoints;
+      let idx = i % totalPoints;
+      let v = (waveform[idx] - 128) / 128;
+
+      // rotationTarget applies ease for smooth ramp
+      rotationTarget += rotationSpeed * ease;
+      let angle = t * Math.PI * 2 + rotationTarget;
+
+      let r = radius + v * 80;
+      let x = cx + Math.cos(angle) * r;
+      let y = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+
+    // ENHANCED GLOW
+    ctx.shadowBlur = 50;
+    ctx.shadowColor = "#C2B0C9";
+    ctx.strokeStyle = "#F4EFD2";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // SUBTLE INTERFERENCE
+    if (Math.random() < 0.04) {
+      let y = Math.random() * h;
+      let slice = ctx.getImageData(0, y, w, 6);
+      ctx.putImageData(slice, (Math.random() - 0.5) * 10, y);
+    }
+
+    // VIGNETTE
+    let g = ctx.createRadialGradient(cx, cy, radius, cx, cy, w);
+    g.addColorStop(0, "rgba(0,0,0,0)");
+    g.addColorStop(1, "rgba(0,0,0,0.5)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  draw(0);
+</script>

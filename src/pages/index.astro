@@ -1,0 +1,319 @@
+<html>
+  <head>
+    <meta name="theme-color" content="#000000" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/favicon/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <canvas id="visualizer"></canvas>
+    <div class="logo">
+      <img src="/badge-cream-1.png" />
+    </div>
+    <nav>
+      <a href="/archive/">ARCHIVE</a>
+    </nav>
+    <audio
+      controls
+      playsinline
+      webkit-playsinline
+      src="/music.mp3"
+      type="audio/mpeg"></audio>
+  </body>
+</html>
+
+<style>
+  @font-face {
+    font-family: "OPTIImprovNewWideNine"; /* Choose a name for your font */
+    src: url("/fonts/OPTIImprovNewWideNine.otf") format("opentype"); /* Specify the correct path and format */
+  }
+
+  body {
+    overflow: hidden;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: black;
+  }
+
+  .logo img {
+    position: absolute;
+    top: 13%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 20%;
+    /* Standard property */
+    user-select: none;
+    /* Vendor prefixes for cross-browser compatibility */
+    -webkit-user-select: none; /* Safari, Chrome */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+
+    /* Prevents dragging */
+    -webkit-user-drag: none; /* Safari, Chrome */
+    user-drag: none; /* Standard property */
+  }
+
+  nav {
+    position: absolute;
+    left: 50%;
+    top: 24.5%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-family: "OPTIImprovNewWideNine";
+    letter-spacing: 2px;
+  }
+
+  nav a:hover {
+    color: #cebfb3;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: #ffecdc;
+  }
+
+  audio {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 20%;
+  }
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: #000;
+  }
+
+  @media screen and (max-width: 1300px) {
+    audio {
+      bottom: 1%;
+    }
+  }
+</style>
+
+<script>
+  // ── CANVAS SETUP ──────────────────────────────────────────────
+  const canvas = document.getElementById("visualizer");
+  const ctx = canvas.getContext("2d");
+  const audio = document.querySelector("audio");
+
+  let w, h, cx, cy;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    cx = w / 2;
+    cy = h / 2;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // ── AUDIO CONTEXT (created/destroyed based on visibility) ─────
+  let audioCtx = null;
+  let source = null;
+  let analyser = null;
+  let freqData = null;
+
+  function setupAudioContext() {
+    if (audioCtx) return; // already set up
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    source = audioCtx.createMediaElementSource(audio);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    freqData = new Uint8Array(analyser.frequencyBinCount);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    audioCtx.resume();
+  }
+
+  function teardownAudioContext() {
+    if (!audioCtx) return;
+    try {
+      source.disconnect();
+      analyser.disconnect();
+      audioCtx.close();
+    } catch (e) {}
+    audioCtx = null;
+    source = null;
+    analyser = null;
+    freqData = null;
+  }
+
+  // ── MEDIA SESSION ─────────────────────────────────────────────
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: "Consolidated Radio",
+      artist: "Live Stream",
+      album: "",
+      artwork: [
+        {
+          src: "https://consolidated.radio/badgeicon-cream.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+      ],
+    });
+    navigator.mediaSession.setActionHandler("play", () => audio.play());
+    navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+    navigator.mediaSession.setActionHandler("stop", () => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+  }
+
+  // ── VISIBILITY: tear down AudioContext when leaving ───────────
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      teardownAudioContext();
+    } else {
+      if (playing) setupAudioContext();
+    }
+  });
+
+  // ── PLAY STATE ────────────────────────────────────────────────
+  let playing = false;
+
+  audio.addEventListener("play", () => {
+    setupAudioContext();
+    playing = true;
+  });
+  audio.addEventListener("pause", () => (playing = false));
+  audio.addEventListener("ended", () => (playing = false));
+
+  // Resume on touch
+  document.addEventListener("touchstart", () => {
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  });
+
+  // ── PERLIN NOISE ──────────────────────────────────────────────
+  let perm = new Uint8Array(512);
+  for (let i = 0; i < 256; i++) perm[i] = i;
+  perm.sort(() => Math.random() - 0.5);
+  for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+  function fade(t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+  function grad(hash, x, y) {
+    const h = hash & 3;
+    return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
+  }
+  function noise(x, y) {
+    let X = Math.floor(x) & 255,
+      Y = Math.floor(y) & 255;
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    let u = fade(x),
+      v = fade(y);
+    let a = perm[X] + Y,
+      b = perm[X + 1] + Y;
+    return lerp(
+      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+      v,
+    );
+  }
+
+  // ── RINGS ─────────────────────────────────────────────────────
+  const rings = Array.from({ length: 6 }, (_, i) => ({
+    radius: (i + 1) * 40,
+    speed: 0.002 + i * 0.001,
+    rotation: Math.random() * Math.PI * 2,
+    noiseOffset: Math.random() * 1000,
+    trebleFactor: 1 - i * 0.1,
+  }));
+
+  let ease = 0;
+  const easeSpeed = 0.02;
+  let time = 0;
+
+  // ── DRAW LOOP ─────────────────────────────────────────────────
+  function draw() {
+    requestAnimationFrame(draw);
+
+    // If no analyser (backgrounded), just fade to black and idle
+    const bass =
+      analyser && freqData
+        ? (analyser.getByteFrequencyData(freqData),
+          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
+            (freqData.length / 4) /
+            255)
+        : 0;
+    const treble =
+      analyser && freqData
+        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
+          ((freqData.length * 3) / 4) /
+          255
+        : 0;
+
+    ease = lerp(ease, playing ? 1 : 0, easeSpeed);
+
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.fillRect(0, 0, w, h);
+
+    if (playing) time += 0.01;
+
+    rings.forEach((r) => {
+      r.rotation += (r.speed + treble * 0.005) * ease;
+      const currentRadius = r.radius + bass * 100 * ease;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(r.rotation);
+      ctx.beginPath();
+
+      const points = 200;
+      for (let p = 0; p <= points; p++) {
+        const angle = (p / points) * Math.PI * 2;
+        const wiggle =
+          noise(
+            Math.cos(angle) * 5 + r.noiseOffset + time,
+            Math.sin(angle) * 5 + r.noiseOffset + time,
+          ) *
+          15 *
+          ease *
+          (1 + treble * 0.5 * r.trebleFactor);
+
+        const x = Math.cos(angle) * (currentRadius + wiggle);
+        const y = Math.sin(angle) * (currentRadius + wiggle);
+        p === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+
+      ctx.closePath();
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = "#ffecdc";
+      ctx.strokeStyle = "#ffecdc";
+      ctx.lineWidth = 3 + bass * 1 * ease;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    });
+  }
+
+  draw();
+</script>
