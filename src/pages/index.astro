@@ -19,6 +19,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap"
       rel="stylesheet"
@@ -29,8 +30,7 @@
     <canvas id="visualizer"></canvas>
 
     <div class="logo">
-      <img src="/badge-cream-1.png" class="logo-img logo-a" />
-      <img src="/badge-cream-2.png" class="logo-img logo-b" />
+      <img id="logoImg" src="/badge-cream-1.png" />
     </div>
 
     <nav>
@@ -64,37 +64,20 @@
 
   /* LOGO */
 
-  .logo {
+  .logo img {
     position: absolute;
     top: 13%;
     left: 50%;
     transform: translate(-50%, -50%);
     height: 20%;
-    width: auto;
+
     user-select: none;
     -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
     -webkit-user-drag: none;
-  }
-
-  .logo-img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-  }
-
-  .logo-a {
-    opacity: 1;
-  }
-  .logo-b {
-    opacity: 0;
-  }
-
-  .logo.swap .logo-a {
-    opacity: 0;
-  }
-  .logo.swap .logo-b {
-    opacity: 1;
+    user-drag: none;
   }
 
   /* NAV */
@@ -147,21 +130,31 @@
 <script>
   // ── LOGO ANIMATION ─────────────────────────
 
-  const logo = document.querySelector(".logo");
+  const logoImg = document.getElementById("logoImg");
+
+  const logos = [
+    "/badge-cream-1.png",
+    "/badge-cream-2.png",
+    "/badge-cream-3.png",
+  ];
+
+  let logoIndex = 0;
   let logoInterval = null;
 
   function startLogoAnimation() {
     if (logoInterval) return;
 
     logoInterval = setInterval(() => {
-      logo.classList.toggle("swap");
-    }, 1500);
+      logoIndex = (logoIndex + 1) % logos.length;
+      logoImg.src = logos[logoIndex];
+    }, 1000);
   }
 
   function stopLogoAnimation() {
     clearInterval(logoInterval);
     logoInterval = null;
-    logo.classList.remove("swap");
+    logoIndex = 0;
+    logoImg.src = logos[0];
   }
 
   // ── CANVAS SETUP ───────────────────────────
@@ -247,7 +240,7 @@
     });
   }
 
-  // ── VISIBILITY HANDLING ────────────────────
+  // ── VISIBILITY ─────────────────────────────
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
