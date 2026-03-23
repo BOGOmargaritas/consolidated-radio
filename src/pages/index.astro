@@ -269,9 +269,9 @@
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
-      teardownAudioContext();
+      playing = false;
     } else {
-      if (playing) setupAudioContext();
+      if (!audio.paused) playing = true;
     }
   });
 
