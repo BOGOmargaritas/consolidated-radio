@@ -61,6 +61,17 @@
     left: 50%;
     transform: translate(-50%, -50%);
     height: 20%;
+
+    /* Standard property */
+    user-select: none;
+    /* Vendor prefixes for cross-browser compatibility */
+    -webkit-user-select: none; /* Safari, Chrome */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+
+    /* Prevents dragging */
+    -webkit-user-drag: none; /* Safari, Chrome */
+    user-drag: none; /* Standard property */
   }
 
   nav {
