@@ -15,23 +15,35 @@
       href="/favicon/apple-touch-icon.png"
     />
     <link rel="manifest" href="/favicon/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
     <canvas id="visualizer"></canvas>
+    <div class="logo">
+      <img src="/badgeicon-cream.png" />
+    </div>
+    <nav>
+      <a href="/archive/">ARCHIVE</a>
+    </nav>
     <audio
       controls
       playsinline
       webkit-playsinline
       src="/music.mp3"
       type="audio/mpeg"></audio>
-    <div class="logo">
-      <img src="/badgeicon-cream.png" />
-    </div>
   </body>
 </html>
 
 <style>
+  @import url("https://fonts.googleapis.com");
+
   body {
     overflow: hidden;
     height: 100%;
@@ -46,6 +58,25 @@
     left: 50%;
     transform: translate(-50%, -50%);
     height: 20%;
+  }
+
+  nav {
+    position: absolute;
+    left: 50%;
+    top: 24%;
+    transform: translate(-50%, -50%);
+    font-size: 15px;
+    font-family: "Vina Sans";
+    letter-spacing: 2px;
+  }
+
+  nav a:hover {
+    color: #cebfb3;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: #ffecdc;
   }
 
   audio {
