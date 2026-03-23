@@ -37,6 +37,10 @@
       <a href="/archive/">ARCHIVE</a>
     </nav>
 
+    <div class="ffs">
+      <a href="https://fruitfly.supply"><img src="/ffs.png" /></a>
+    </div>
+
     <audio
       controls
       playsinline
@@ -95,10 +99,31 @@
   nav a {
     text-decoration: none;
     color: #ffecdc;
+    transition: opacity 0.25s ease-in-out;
   }
 
   nav a:hover {
-    color: #cebfb3;
+    opacity: 75%;
+  }
+
+  .ffs img {
+    position: absolute;
+    right: 5%;
+    bottom: 5%;
+    width: 125px;
+
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
+    -webkit-user-drag: none;
+    user-drag: none;
+    transition: opacity 0.25s ease-in-out;
+  }
+
+  .ffs img:hover {
+    opacity: 80%;
   }
 
   /* AUDIO */
