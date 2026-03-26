@@ -53,7 +53,7 @@ const tracks = [
           </button>
 
           <div class="vol-row">
-            <svg width="16" height="16" viewBox="0 0 24 24">
+            <svg class="vol-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#e8d5b7"></polygon>
               <path d="M16 9c1.5 1.5 1.5 4.5 0 6" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
               <path d="M19 7c3 3 3 7 0 10" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
@@ -233,6 +233,11 @@ const tracks = [
     align-items: center;
     gap: 8px;
     margin-right: 10px;
+  }
+
+  .vol-icon {
+    display: block;
+    flex-shrink: 0;
   }
 
   .vol-track {
