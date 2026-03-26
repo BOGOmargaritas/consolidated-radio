@@ -24,7 +24,7 @@ const tracks = [
       <div class="player">
         <div class="transport">
           <button class="play-btn" id="playBtn">
-            <svg id="playIcon" viewBox="0 0 80 80" width="52" height="52">
+            <svg id="playIcon" viewBox="0 0 80 80" width="64" height="64">
               <polygon points="22,16 60,40 22,64" fill="#e8d5b7" stroke-linejoin="round" stroke-linecap="round"></polygon>
             </svg>
           </button>
@@ -152,8 +152,8 @@ const tracks = [
     background: none;
     border: none;
     cursor: pointer;
-    width: 52px;
-    height: 52px;
+    width: 64px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -166,6 +166,7 @@ const tracks = [
     display: flex;
     flex-direction: column;
     gap: 4px;
+    margin-top: 12px;
   }
 
   .scrubber-track {
@@ -231,6 +232,7 @@ const tracks = [
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-right: 10px;
   }
 
   .vol-track {
@@ -296,7 +298,7 @@ const tracks = [
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
+    padding: 8px 16px;
     background: #1c1c1c;
     border-bottom: 2px solid #e8d5b7;
   }
