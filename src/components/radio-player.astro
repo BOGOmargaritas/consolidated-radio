@@ -24,8 +24,8 @@ const { title, description, audioSrc, tracks } = Astro.props;
       <div class="player">
         <div class="transport">
           <button class="play-btn" id="playBtn">
-            <svg id="playIcon" viewBox="0 0 80 80" width="64" height="64">
-              <polygon points="22,16 60,40 22,64" fill="#e8d5b7" stroke-linejoin="round" stroke-linecap="round"></polygon>
+            <svg id="playIcon" viewBox="20 8 42 65" width="52" height="80">
+              <path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#e8d5b7"></path>
             </svg>
           </button>
 
@@ -43,7 +43,7 @@ const { title, description, audioSrc, tracks } = Astro.props;
 
         <div class="bottom-row">
           <button class="info-btn" id="infoBtn">
-            <svg width="18" height="15" viewBox="0 0 18 15" fill="none">
+            <svg width="21" height="18" viewBox="0 0 18 15" fill="none">
               <path d="M1 13V3.5L7 1v10M1 13l6-2.5" stroke="#e8d5b7" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></path>
               <path d="M7 1l9-1v10L7 11.5" stroke="#e8d5b7" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"></path>
               <circle cx="4" cy="13" r="2.2" fill="#e8d5b7"></circle>
@@ -53,7 +53,7 @@ const { title, description, audioSrc, tracks } = Astro.props;
           </button>
 
           <div class="vol-row">
-            <svg class="vol-icon" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="vol-icon" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
               <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#e8d5b7"></polygon>
               <path d="M16 9c1.5 1.5 1.5 4.5 0 6" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
               <path d="M19 7c3 3 3 7 0 10" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
@@ -95,12 +95,19 @@ const { title, description, audioSrc, tracks } = Astro.props;
 <audio id="audio"></audio>
 
 <style>
+  @font-face {
+    font-family: "OPTIImprovNewWideNine";
+    src: url("/fonts/OPTIImprovNewWideNine.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+  }
+
   .player-wrapper {
-    width: 640px;
-    border: 3px solid #1c1c1c;
+    width: 800px;
+    border: 3px solid #e8d5b7;
     border-radius: 12px;
     overflow: hidden;
-    font-family: "Barlow Condensed", sans-serif;
+    font-family: "OPTIImprovNewWideNine", sans-serif;
     background: #e8d5b7;
   }
 
@@ -123,7 +130,9 @@ const { title, description, audioSrc, tracks } = Astro.props;
   }
 
   .header {
-    padding: 5px 14px 6px;
+    padding: 4px 6px 10px;
+    display: flex;
+    align-items: center;
   }
 
   .ep-title {
@@ -131,15 +140,16 @@ const { title, description, audioSrc, tracks } = Astro.props;
     font-weight: 900;
     letter-spacing: 0.04em;
     color: #1c1c1c;
+    line-height: 1;
   }
 
   .player {
-    padding: 12px 14px;
+    padding: 5px 10px;
     background: #1c1c1c;
     border-radius: 0 0 10px 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     flex: 1;
     justify-content: center;
   }
@@ -147,18 +157,18 @@ const { title, description, audioSrc, tracks } = Astro.props;
   .transport {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
 
   .play-btn {
     background: none;
     border: none;
     cursor: pointer;
-    width: 64px;
-    height: 64px;
+    width: 60px;
+    height: 80px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     flex-shrink: 0;
     padding: 0;
   }
@@ -168,11 +178,12 @@ const { title, description, audioSrc, tracks } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-top: 12px;
+    padding-top: 15px;
+    padding-right: 7px;
   }
 
   .scrubber-track {
-    height: 3px;
+    height: 5px;
     background: #e8d5b7;
     border-radius: 100px;
     position: relative;
@@ -189,8 +200,8 @@ const { title, description, audioSrc, tracks } = Astro.props;
   }
 
   .scrubber-thumb {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     background: #e8d5b7;
     border-radius: 50%;
     position: absolute;
@@ -203,7 +214,7 @@ const { title, description, audioSrc, tracks } = Astro.props;
   .time-row {
     display: flex;
     justify-content: space-between;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #e8d5b7;
     letter-spacing: 0.04em;
@@ -219,11 +230,11 @@ const { title, description, audioSrc, tracks } = Astro.props;
     background: none;
     border: none;
     color: #e8d5b7;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     font-weight: 900;
     letter-spacing: 0.12em;
     cursor: pointer;
-    font-family: "Barlow Condensed", sans-serif;
+    font-family: "OPTIImprovNewWideNine", sans-serif;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -243,8 +254,8 @@ const { title, description, audioSrc, tracks } = Astro.props;
   }
 
   .vol-track {
-    width: 60px;
-    height: 3px;
+    width: 80px;
+    height: 5px;
     background: #e8d5b7;
     border-radius: 100px;
     position: relative;
@@ -261,8 +272,8 @@ const { title, description, audioSrc, tracks } = Astro.props;
   }
 
   .vol-thumb {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     background: #e8d5b7;
     border-radius: 50%;
     position: absolute;
@@ -282,13 +293,14 @@ const { title, description, audioSrc, tracks } = Astro.props;
   }
 
   .description {
-    padding: 12px 14px 14px;
+    padding: 8px 14px 14px;
     font-size: 0.85rem;
     font-weight: 700;
     line-height: 1.5;
     color: #1c1c1c;
     letter-spacing: 0.01em;
-    border-bottom: 2px solid #1c1c1c;
+    border-bottom: 5.5px solid #1c1c1c;
+    text-align: justify;
   }
 
   .tracklist-section {
@@ -296,7 +308,7 @@ const { title, description, audioSrc, tracks } = Astro.props;
   }
 
   .tracklist-label {
-    padding: 12px 20px 10px;
+    padding: 3px 13px 4px;
     font-size: 1.15rem;
     font-weight: 900;
     letter-spacing: 0.1em;
@@ -307,7 +319,7 @@ const { title, description, audioSrc, tracks } = Astro.props;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 16px;
+    padding: 6px 16px;
     background: #1c1c1c;
     border-bottom: 2px solid #e8d5b7;
   }
@@ -380,7 +392,7 @@ const { title, description, audioSrc, tracks } = Astro.props;
   const playBtn = document.getElementById("playBtn")!;
   const playIcon = document.getElementById("playIcon")!;
 
-  const PLAY = `<polygon points="22,16 60,40 22,64" fill="#e8d5b7"/>`;
+  const PLAY = `<path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#e8d5b7"/>`;
   const PAUSE = `
     <rect x="22" y="18" width="12" height="44" rx="4" fill="#e8d5b7"/>
     <rect x="44" y="18" width="12" height="44" rx="4" fill="#e8d5b7"/>
