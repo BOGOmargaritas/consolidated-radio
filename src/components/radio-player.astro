@@ -22,46 +22,48 @@ const { title, description, audioSrc, tracks } = Astro.props;
       </div>
 
       <div class="player">
-        <div class="transport">
-          <button class="play-btn" id="playBtn">
-            <svg id="playIcon" viewBox="20 8 42 65" width="52" height="80">
-              <path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#e8d5b7"></path>
-            </svg>
-          </button>
+        <div class="player-controls">
+          <div class="transport">
+            <button class="play-btn" id="playBtn">
+              <svg id="playIcon" viewBox="20 8 42 65" width="52" height="80">
+                <path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#e8d5b7"></path>
+              </svg>
+            </button>
 
-          <div class="scrubber-col">
-            <div class="scrubber-track" id="scrubber">
-              <div class="scrubber-fill" id="sFill"></div>
-              <div class="scrubber-thumb" id="sThumb"></div>
-            </div>
-            <div class="time-row">
-              <span id="tCur">00.00</span>
-              <span id="tEnd">00.00</span>
+            <div class="scrubber-col">
+              <div class="scrubber-track" id="scrubber">
+                <div class="scrubber-fill" id="sFill"></div>
+                <div class="scrubber-thumb" id="sThumb"></div>
+              </div>
+              <div class="time-row">
+                <span id="tCur">00.00</span>
+                <span id="tEnd">00.00</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="bottom-row">
-          <button class="info-btn" id="infoBtn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 2000 2000">
-              <path fill="#e8d5b7" d="M1511.78,544.32v1086.67c0,159.11-77.1,230.81-108.18,260.64-295.63,283.73-770.54-70.42-580.71-435.77,94.78-182.43,294.4-235.83,483.56-174.74V210.78c0-113.44,3.52-157.96,27.44-178.43,21.46-18.37,50.91-26.05,78.66-26.89,41.45-1.26,82.26,10.23,121.82,21.26,97.09,27.06,197.79,57.62,278.02,121.1,1.94,1.53,3.86,3.08,5.77,4.65,56.83,46.74,99.92,107.86,127.59,175.86,28.47,69.98,41.02,145.68,43.07,220.95,1.11,40.73-.28,82.03-5.33,122.49-4.27,38.9-23.1,60.76-64.09,51.64l-407.59-179.08Z"/>
-              <path fill="#e8d5b7" d="M94.11,341.38l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
-              <path fill="#e8d5b7" d="M94.11,1072.18l608.87-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
-              <path fill="#e8d5b7" d="M94.11,703.71l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
-            </svg>
-            INFO
-          </button>
+          <div class="bottom-row">
+            <button class="info-btn" id="infoBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 2000 2000">
+                <path fill="#e8d5b7" d="M1511.78,544.32v1086.67c0,159.11-77.1,230.81-108.18,260.64-295.63,283.73-770.54-70.42-580.71-435.77,94.78-182.43,294.4-235.83,483.56-174.74V210.78c0-113.44,3.52-157.96,27.44-178.43,21.46-18.37,50.91-26.05,78.66-26.89,41.45-1.26,82.26,10.23,121.82,21.26,97.09,27.06,197.79,57.62,278.02,121.1,1.94,1.53,3.86,3.08,5.77,4.65,56.83,46.74,99.92,107.86,127.59,175.86,28.47,69.98,41.02,145.68,43.07,220.95,1.11,40.73-.28,82.03-5.33,122.49-4.27,38.9-23.1,60.76-64.09,51.64l-407.59-179.08Z"/>
+                <path fill="#e8d5b7" d="M94.11,341.38l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
+                <path fill="#e8d5b7" d="M94.11,1072.18l608.87-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
+                <path fill="#e8d5b7" d="M94.11,703.71l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
+              </svg>
+              INFO
+            </button>
 
-          <div class="vol-row">
-            <svg class="vol-icon" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
-              <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#e8d5b7"></polygon>
-              <path d="M16 9c1.5 1.5 1.5 4.5 0 6" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
-              <path d="M19 7c3 3 3 7 0 10" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
-            </svg>
+            <div class="vol-row">
+              <svg class="vol-icon" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#e8d5b7"></polygon>
+                <path d="M16 9c1.5 1.5 1.5 4.5 0 6" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
+                <path d="M19 7c3 3 3 7 0 10" stroke="#e8d5b7" stroke-width="2" stroke-linecap="round" fill="none"></path>
+              </svg>
 
-            <div class="vol-track" id="volTrack">
-              <div class="vol-fill" id="vFill"></div>
-              <div class="vol-thumb" id="vThumb"></div>
+              <div class="vol-track" id="volTrack">
+                <div class="vol-fill" id="vFill"></div>
+                <div class="vol-thumb" id="vThumb"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -159,9 +161,16 @@ const { title, description, audioSrc, tracks } = Astro.props;
     border-radius: 0 0 23px 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
     flex: 1;
-    justify-content: start;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  .player-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
   }
 
   .transport {
