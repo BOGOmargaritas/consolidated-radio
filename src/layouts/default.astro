@@ -1,10 +1,19 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta name="theme-color" content="#000000" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>EP01 - Telephone</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap" rel="stylesheet" />
   </head>
   <body>
     <slot />
@@ -12,10 +21,19 @@
 </html>
 
 <style>
-  body {
-    overflow: hidden;
+  @font-face {
+    font-family: "OPTIImprovNewWideNine";
+    src: url("/fonts/OPTIImprovNewWideNine.otf") format("opentype");
+  }
+
+  html {
     height: 100%;
+  }
+
+  body {
+    min-height: 100%;
     margin: 0;
     padding: 0;
+    background-color: black;
   }
 </style>
