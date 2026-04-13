@@ -3,7 +3,11 @@ import DefaultLayout from "../layouts/default.astro";
 import RadioPlayer from "../components/radio-player.astro";
 
 const tracks = [
-  { artist: "BOB DYLAN", title: "LIKE A ROLLING STONE THAT CALLED ME TOO MANY TIMES TRYING TO ORDER PIZZA" },
+  {
+    artist: "BOB DYLAN",
+    title:
+      "LIKE A ROLLING STONE THAT CALLED ME TOO MANY TIMES TRYING TO ORDER PIZZA",
+  },
   { artist: "MATT CHAMPION", title: "SLUG" },
   { artist: "GORILLAZ", title: "TICKER TAPE" },
   { artist: "QUANTIC", title: "ATLANTIC OSCILLATIONS" },
@@ -11,7 +15,7 @@ const tracks = [
   { artist: "VAMPIRE WEEKEND", title: "M79" },
   { artist: "NOBUO UEMATSU", title: "PRELUDE" },
   { artist: "KENDRICK LAMAR", title: "LUST." },
-  { artist: "GEESE", title: "COBRA" }
+  { artist: "GEESE", title: "COBRA" },
 ];
 ---
 
@@ -157,7 +161,11 @@ const tracks = [
 
   const logoImg = document.getElementById("logoImg");
 
-  const logos = ["/badge-cream-1.png", "/badge-cream-2.png", "/badge-cream-3.png"];
+  const logos = [
+    "/badge-cream-1.png",
+    "/badge-cream-2.png",
+    "/badge-cream-3.png",
+  ];
 
   let logoIndex = 0;
   let logoInterval = null;
@@ -232,9 +240,9 @@ const tracks = [
         {
           src: "https://consolidated.radio/badgeicon-cream.png",
           sizes: "512x512",
-          type: "image/png"
-        }
-      ]
+          type: "image/png",
+        },
+      ],
     });
 
     navigator.mediaSession.setActionHandler("play", () => audio.play());
@@ -318,7 +326,11 @@ const tracks = [
     let a = perm[X] + Y;
     let b = perm[X + 1] + Y;
 
-    return lerp(lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u), lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u), v);
+    return lerp(
+      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+      v,
+    );
   }
 
   // ── RINGS ──────────────────────────────────
@@ -328,7 +340,7 @@ const tracks = [
     speed: 0.002 + i * 0.001,
     rotation: Math.random() * Math.PI * 2,
     noiseOffset: Math.random() * 1000,
-    trebleFactor: 1 - i * 0.1
+    trebleFactor: 1 - i * 0.1,
   }));
 
   let ease = 0;
@@ -342,10 +354,18 @@ const tracks = [
 
     const bass =
       analyser && freqData
-        ? (analyser.getByteFrequencyData(freqData), freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) / (freqData.length / 4) / 255)
+        ? (analyser.getByteFrequencyData(freqData),
+          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
+            (freqData.length / 4) /
+            255)
         : 0;
 
-    const treble = analyser && freqData ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) / ((freqData.length * 3) / 4) / 255 : 0;
+    const treble =
+      analyser && freqData
+        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
+          ((freqData.length * 3) / 4) /
+          255
+        : 0;
 
     ease = lerp(ease, playing ? 1 : 0, easeSpeed);
 
@@ -369,7 +389,10 @@ const tracks = [
         const angle = (p / points) * Math.PI * 2;
 
         const wiggle =
-          noise(Math.cos(angle) * 5 + r.noiseOffset + time, Math.sin(angle) * 5 + r.noiseOffset + time) *
+          noise(
+            Math.cos(angle) * 5 + r.noiseOffset + time,
+            Math.sin(angle) * 5 + r.noiseOffset + time,
+          ) *
           15 *
           ease *
           (1 + treble * 0.5 * r.trebleFactor);
