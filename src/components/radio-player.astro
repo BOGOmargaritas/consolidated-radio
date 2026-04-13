@@ -41,7 +41,7 @@ const playerStyle = [
                 <svg id="playIcon" viewBox="20 8 42 65">
                   <path
                     d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z"
-                    fill="#e8d5b7"></path>
+                    fill="#ffecdc"></path>
                 </svg>
               </button>
 
@@ -65,19 +65,19 @@ const playerStyle = [
                   viewBox="0 0 2000 2000"
                 >
                   <path
-                    fill="#e8d5b7"
+                    fill="#ffecdc"
                     d="M1511.78,544.32v1086.67c0,159.11-77.1,230.81-108.18,260.64-295.63,283.73-770.54-70.42-580.71-435.77,94.78-182.43,294.4-235.83,483.56-174.74V210.78c0-113.44,3.52-157.96,27.44-178.43,21.46-18.37,50.91-26.05,78.66-26.89,41.45-1.26,82.26,10.23,121.82,21.26,97.09,27.06,197.79,57.62,278.02,121.1,1.94,1.53,3.86,3.08,5.77,4.65,56.83,46.74,99.92,107.86,127.59,175.86,28.47,69.98,41.02,145.68,43.07,220.95,1.11,40.73-.28,82.03-5.33,122.49-4.27,38.9-23.1,60.76-64.09,51.64l-407.59-179.08Z"
                   ></path>
                   <path
-                    fill="#e8d5b7"
+                    fill="#ffecdc"
                     d="M94.11,341.38l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"
                   ></path>
                   <path
-                    fill="#e8d5b7"
+                    fill="#ffecdc"
                     d="M94.11,1072.18l608.87-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"
                   ></path>
                   <path
-                    fill="#e8d5b7"
+                    fill="#ffecdc"
                     d="M94.11,703.71l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"
                   ></path>
                 </svg>
@@ -86,17 +86,17 @@ const playerStyle = [
 
               <div class="vol-row">
                 <svg class="vol-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#e8d5b7"
+                  <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#ffecdc"
                   ></polygon>
                   <path
                     d="M16 9c1.5 1.5 1.5 4.5 0 6"
-                    stroke="#e8d5b7"
+                    stroke="#ffecdc"
                     stroke-width="2"
                     stroke-linecap="round"
                     fill="none"></path>
                   <path
                     d="M19 7c3 3 3 7 0 10"
-                    stroke="#e8d5b7"
+                    stroke="#ffecdc"
                     stroke-width="2"
                     stroke-linecap="round"
                     fill="none"></path>
@@ -161,10 +161,10 @@ const playerStyle = [
     box-sizing: border-box;
     width: 100%;
     max-width: calc(800px * var(--player-scale));
-    border: calc(3px * var(--player-scale)) solid #e8d5b7;
+    border: calc(3px * var(--player-scale)) solid #ffecdc;
     overflow: hidden;
     font-family: "OPTIImprovNewWideNine", sans-serif;
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: calc(30px * var(--player-scale));
   }
 
@@ -199,7 +199,7 @@ const playerStyle = [
   .right-col {
     display: flex;
     flex-direction: column;
-    background: #e8d5b7;
+    background: #ffecdc;
   }
 
   .header {
@@ -213,7 +213,7 @@ const playerStyle = [
     font-size: calc(1.45rem * var(--player-scale));
     font-weight: 900;
     letter-spacing: 0.04em;
-    color: #1c1c1c;
+    color: #000000;
     line-height: 1;
   }
 
@@ -221,7 +221,7 @@ const playerStyle = [
     --ctrl: calc(var(--player-scale) * var(--control-scale));
     padding: calc(5px * var(--player-scale)) calc(10px * var(--player-scale))
       calc(5px * var(--player-scale)) calc(18px * var(--player-scale));
-    background: #1c1c1c;
+    background: #000000;
     border-radius: 0 0 calc(23px * var(--player-scale)) 0;
     display: flex;
     flex-direction: column;
@@ -280,7 +280,7 @@ const playerStyle = [
 
   .scrubber-track {
     height: calc(5px * var(--ctrl));
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: 100px;
     position: relative;
     cursor: pointer;
@@ -288,7 +288,7 @@ const playerStyle = [
 
   .scrubber-fill {
     height: 100%;
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: 100px;
     width: 0%;
     opacity: 1;
@@ -297,7 +297,7 @@ const playerStyle = [
   .scrubber-thumb {
     width: calc(14px * var(--ctrl));
     height: calc(14px * var(--ctrl));
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: 50%;
     position: absolute;
     top: 50%;
@@ -311,7 +311,7 @@ const playerStyle = [
     justify-content: space-between;
     font-size: calc(0.55rem * var(--ctrl));
     font-weight: 700;
-    color: #e8d5b7;
+    color: #ffecdc;
     letter-spacing: 0.04em;
   }
 
@@ -325,7 +325,7 @@ const playerStyle = [
   .info-btn {
     background: none;
     border: none;
-    color: #e8d5b7;
+    color: #ffecdc;
     font-size: calc(0.8rem * var(--ctrl));
     font-weight: 900;
     letter-spacing: 0.12em;
@@ -354,7 +354,7 @@ const playerStyle = [
   .vol-track {
     width: calc(80px * var(--ctrl));
     height: calc(5px * var(--ctrl));
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: 100px;
     position: relative;
     cursor: pointer;
@@ -362,7 +362,7 @@ const playerStyle = [
 
   .vol-fill {
     height: 100%;
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: 100px;
     width: 80%;
     opacity: 1;
@@ -371,7 +371,7 @@ const playerStyle = [
   .vol-thumb {
     width: calc(14px * var(--ctrl));
     height: calc(14px * var(--ctrl));
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: 50%;
     position: absolute;
     top: 50%;
@@ -395,14 +395,14 @@ const playerStyle = [
     font-size: calc(0.85rem * var(--player-scale));
     font-weight: 700;
     line-height: 1.3;
-    color: #1c1c1c;
+    color: #000000;
     letter-spacing: 0.01em;
-    border-bottom: calc(5.5px * var(--player-scale)) solid #1c1c1c;
+    border-bottom: calc(5.5px * var(--player-scale)) solid #000000;
     text-align: justify;
   }
 
   .tracklist-section {
-    background: #e8d5b7;
+    background: #ffecdc;
   }
 
   .tracklist-label {
@@ -411,7 +411,7 @@ const playerStyle = [
     font-size: calc(1.15rem * var(--player-scale));
     font-weight: 900;
     letter-spacing: 0.1em;
-    color: #1c1c1c;
+    color: #000000;
   }
 
   .track-row {
@@ -419,8 +419,8 @@ const playerStyle = [
     align-items: center;
     gap: calc(12px * var(--player-scale));
     padding: calc(6px * var(--player-scale)) calc(16px * var(--player-scale));
-    background: #1c1c1c;
-    border-bottom: calc(2px * var(--player-scale)) solid #e8d5b7;
+    background: #000000;
+    border-bottom: calc(2px * var(--player-scale)) solid #ffecdc;
   }
 
   .track-row:last-child {
@@ -430,13 +430,13 @@ const playerStyle = [
   .dot {
     width: calc(8px * var(--player-scale));
     height: calc(8px * var(--player-scale));
-    background: #e8d5b7;
+    background: #ffecdc;
     border-radius: 50%;
     flex-shrink: 0;
   }
 
   .track-name {
-    color: #e8d5b7;
+    color: #ffecdc;
     font-size: calc(1.05rem * var(--player-scale));
     font-weight: 900;
     letter-spacing: 0.07em;
@@ -491,10 +491,10 @@ const playerStyle = [
   const playBtn = document.getElementById("playBtn")!;
   const playIcon = document.getElementById("playIcon")!;
 
-  const PLAY = `<path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#e8d5b7"/>`;
+  const PLAY = `<path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#ffecdc"/>`;
   const PAUSE = `
-    <rect x="22" y="18" width="12" height="44" rx="4" fill="#e8d5b7"/>
-    <rect x="44" y="18" width="12" height="44" rx="4" fill="#e8d5b7"/>
+    <rect x="22" y="18" width="12" height="44" rx="4" fill="#ffecdc"/>
+    <rect x="44" y="18" width="12" height="44" rx="4" fill="#ffecdc"/>
   `;
 
   playBtn.onclick = () => {
