@@ -1,79 +1,89 @@
-<html>
-  <head>
-    <meta name="theme-color" content="#000000" />
+---
+import DefaultLayout from "../layouts/default.astro";
+import RadioPlayer from "../components/radio-player.astro";
 
-    <link
-      rel="icon"
-      type="image/png"
-      href="/favicon/favicon-96x96.png"
-      sizes="96x96"
-    />
-    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon/favicon.ico" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/favicon/apple-touch-icon.png"
-    />
-    <link rel="manifest" href="/favicon/site.webmanifest" />
+const tracks = [
+  { artist: "BOB DYLAN", title: "LIKE A ROLLING STONE THAT CALLED ME TOO MANY TIMES TRYING TO ORDER PIZZA" },
+  { artist: "MATT CHAMPION", title: "SLUG" },
+  { artist: "GORILLAZ", title: "TICKER TAPE" },
+  { artist: "QUANTIC", title: "ATLANTIC OSCILLATIONS" },
+  { artist: "MGMT", title: "MOTHER NATURE" },
+  { artist: "VAMPIRE WEEKEND", title: "M79" },
+  { artist: "NOBUO UEMATSU", title: "PRELUDE" },
+  { artist: "KENDRICK LAMAR", title: "LUST." },
+  { artist: "GEESE", title: "COBRA" }
+];
+---
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-    <link
-      href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-
-  <body>
-    <canvas id="visualizer"></canvas>
-
-    <div class="logo">
-      <img id="logoImg" src="/badge-cream-1.png" />
+<DefaultLayout>
+  <canvas id="visualizer"></canvas>
+  <div class="logo">
+    <img id="logoImg" src="/badge-cream-1.png" />
+  </div>
+  <nav class="site-nav">
+    <a href="/archive/">ARCHIVE</a>
+  </nav>
+  <div class="ffs">
+    <a href="https://fruitfly.supply"><img src="/ffs.png" /></a>
+  </div>
+  <div class="page-flow">
+    <div class="spacer" id="playerSpacer"></div>
+    <div class="player-dock" id="playerDock">
+      <RadioPlayer
+        title="EP01 - THE TELEPHONE "
+        description="Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper"
+        audioSrc="/music.mp3"
+        tracks={tracks}
+      />
     </div>
-
-    <nav>
-      <a href="/archive/">ARCHIVE</a>
-    </nav>
-
-    <div class="ffs">
-      <a href="https://fruitfly.supply"><img src="/ffs.png" /></a>
-    </div>
-
-    <audio
-      controls
-      playsinline
-      webkit-playsinline
-      src="/music.mp3"
-      type="audio/mpeg"
-    >
-    </audio>
-  </body>
-</html>
+  </div>
+</DefaultLayout>
 
 <style>
-  @font-face {
-    font-family: "OPTIImprovNewWideNine";
-    src: url("/fonts/OPTIImprovNewWideNine.otf") format("opentype");
+  :global(body) {
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
-  body {
-    overflow: hidden;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: black;
+  /* z-index layers: 0 = canvas, 1 = player flow, 2 = logo/nav/ffs */
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: #000;
+  }
+
+  .page-flow {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .spacer {
+    flex-shrink: 0;
+  }
+
+  .player-dock {
+    flex-shrink: 0;
+    width: min(500px, calc(100vw - 24px));
+    box-sizing: border-box;
+    padding-bottom: max(28px, 5dvh);
+    pointer-events: auto;
   }
 
   /* LOGO */
 
   .logo img {
-    position: absolute;
-    top: 13%;
+    position: fixed;
+    top: 13vh;
     left: 50%;
     transform: translate(-50%, -50%);
-    height: 20%;
+    height: 20vh;
+    z-index: 2;
 
     user-select: none;
     -webkit-user-select: none;
@@ -87,10 +97,11 @@
   /* NAV */
 
   nav {
-    position: absolute;
+    position: fixed;
     left: 50%;
-    top: 24.5%;
+    top: 24.5vh;
     transform: translate(-50%, -50%);
+    z-index: 2;
     font-size: 10px;
     font-family: "OPTIImprovNewWideNine";
     letter-spacing: 2px;
@@ -107,10 +118,11 @@
   }
 
   .ffs img {
-    position: absolute;
-    right: 3%;
-    bottom: 3%;
+    position: fixed;
+    right: 3vw;
+    bottom: 3vh;
     width: 125px;
+    z-index: 2;
 
     user-select: none;
     -webkit-user-select: none;
@@ -125,43 +137,27 @@
   .ffs img:hover {
     opacity: 80%;
   }
-
-  /* AUDIO */
-
-  audio {
-    position: absolute;
-    bottom: 5%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: 20%;
-  }
-
-  /* CANVAS */
-
-  canvas {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background: #000;
-  }
-
-  @media screen and (max-width: 1300px) {
-    audio {
-      bottom: 1%;
-    }
-  }
 </style>
 
 <script>
+  // ── SPACER: pin player to bottom of viewport, never recalculate ──
+
+  const spacer = document.getElementById("playerSpacer")!;
+  const dock = document.getElementById("playerDock")!;
+
+  function setSpacer() {
+    const gap = window.innerHeight - dock.offsetHeight;
+    spacer.style.height = Math.max(0, gap) + "px";
+  }
+
+  setSpacer();
+  window.addEventListener("resize", setSpacer);
+
   // ── LOGO ANIMATION ─────────────────────────
 
   const logoImg = document.getElementById("logoImg");
 
-  const logos = [
-    "/badge-cream-1.png",
-    "/badge-cream-2.png",
-    "/badge-cream-3.png",
-  ];
+  const logos = ["/badge-cream-1.png", "/badge-cream-2.png", "/badge-cream-3.png"];
 
   let logoIndex = 0;
   let logoInterval = null;
@@ -225,21 +221,6 @@
     audioCtx.resume();
   }
 
-  function teardownAudioContext() {
-    if (!audioCtx) return;
-
-    try {
-      source.disconnect();
-      analyser.disconnect();
-      audioCtx.close();
-    } catch (e) {}
-
-    audioCtx = null;
-    source = null;
-    analyser = null;
-    freqData = null;
-  }
-
   // ── MEDIA SESSION ──────────────────────────
 
   if ("mediaSession" in navigator) {
@@ -251,9 +232,9 @@
         {
           src: "https://consolidated.radio/badgeicon-cream.png",
           sizes: "512x512",
-          type: "image/png",
-        },
-      ],
+          type: "image/png"
+        }
+      ]
     });
 
     navigator.mediaSession.setActionHandler("play", () => audio.play());
@@ -337,11 +318,7 @@
     let a = perm[X] + Y;
     let b = perm[X + 1] + Y;
 
-    return lerp(
-      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
-      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
-      v,
-    );
+    return lerp(lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u), lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u), v);
   }
 
   // ── RINGS ──────────────────────────────────
@@ -351,7 +328,7 @@
     speed: 0.002 + i * 0.001,
     rotation: Math.random() * Math.PI * 2,
     noiseOffset: Math.random() * 1000,
-    trebleFactor: 1 - i * 0.1,
+    trebleFactor: 1 - i * 0.1
   }));
 
   let ease = 0;
@@ -365,18 +342,10 @@
 
     const bass =
       analyser && freqData
-        ? (analyser.getByteFrequencyData(freqData),
-          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
-            (freqData.length / 4) /
-            255)
+        ? (analyser.getByteFrequencyData(freqData), freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) / (freqData.length / 4) / 255)
         : 0;
 
-    const treble =
-      analyser && freqData
-        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
-          ((freqData.length * 3) / 4) /
-          255
-        : 0;
+    const treble = analyser && freqData ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) / ((freqData.length * 3) / 4) / 255 : 0;
 
     ease = lerp(ease, playing ? 1 : 0, easeSpeed);
 
@@ -400,10 +369,7 @@
         const angle = (p / points) * Math.PI * 2;
 
         const wiggle =
-          noise(
-            Math.cos(angle) * 5 + r.noiseOffset + time,
-            Math.sin(angle) * 5 + r.noiseOffset + time,
-          ) *
+          noise(Math.cos(angle) * 5 + r.noiseOffset + time, Math.sin(angle) * 5 + r.noiseOffset + time) *
           15 *
           ease *
           (1 + treble * 0.5 * r.trebleFactor);
