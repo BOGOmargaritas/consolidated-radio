@@ -167,13 +167,19 @@ const tracks = [
   const ctx = canvas.getContext("2d");
   const audio = document.querySelector("audio");
 
+  /** Matches ~800px player artboard; shrinks ring layout on narrow viewports. */
+  const VIZ_REF_PX = 800;
+
   let w, h, cx, cy;
+  /** Scale for ring geometry (1 at large viewports, smaller on narrow screens). */
+  let vizScale = 1;
 
   function resize() {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
     cx = w / 2;
     cy = h / 2;
+    vizScale = Math.min(1, Math.min(w, h) / VIZ_REF_PX);
   }
 
   resize();
@@ -349,9 +355,11 @@ const tracks = [
 
     if (playing) time += 0.01;
 
+    const s = vizScale;
+
     rings.forEach((r) => {
       r.rotation += (r.speed + treble * 0.005) * ease;
-      const currentRadius = r.radius + bass * 100 * ease;
+      const currentRadius = r.radius * s + bass * 100 * s * ease;
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -369,6 +377,7 @@ const tracks = [
             Math.sin(angle) * 5 + r.noiseOffset + time,
           ) *
           15 *
+          s *
           ease *
           (1 + treble * 0.5 * r.trebleFactor);
 
@@ -380,10 +389,10 @@ const tracks = [
 
       ctx.closePath();
 
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = 8 * s;
       ctx.shadowColor = "#ffecdc";
       ctx.strokeStyle = "#ffecdc";
-      ctx.lineWidth = 3 + bass * 1 * ease;
+      ctx.lineWidth = (3 + bass * 1 * ease) * s;
       ctx.stroke();
 
       ctx.shadowBlur = 0;
