@@ -150,9 +150,18 @@ const playerStyle = [
   /* Full ~800px design at scale 1; shrinks when the root is narrower than 800px. */
   .radio-player-root {
     container-type: inline-size;
-    width: 100%;
-    max-width: 800px;
+    flex-shrink: 0;
+    width: min(500px, calc(100vw - 24px));
+    box-sizing: border-box;
     margin-inline: auto;
+    padding-bottom: max(28px, 5dvh);
+    pointer-events: auto;
+  }
+
+  @media (max-width: 639px) {
+    .radio-player-root {
+      width: min(500px, calc(100vw - 52px));
+    }
   }
 
   .player-wrapper {
