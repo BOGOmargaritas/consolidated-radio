@@ -31,8 +31,7 @@ const tracks = [
     <a href="https://fruitfly.supply"><img src="/ffs.png" /></a>
   </div>
   <div class="page-flow">
-    <div class="spacer" id="playerSpacer"></div>
-    <div class="player-dock" id="playerDock">
+    <div class="player-dock">
       <RadioPlayer
         title="EP01 - THE TELEPHONE "
         description="Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper"
@@ -64,11 +63,10 @@ const tracks = [
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-end;
+    min-height: 100dvh;
+    box-sizing: border-box;
     pointer-events: none;
-  }
-
-  .spacer {
-    flex-shrink: 0;
   }
 
   .player-dock {
@@ -144,19 +142,6 @@ const tracks = [
 </style>
 
 <script>
-  // ── SPACER: pin player to bottom of viewport, never recalculate ──
-
-  const spacer = document.getElementById("playerSpacer")!;
-  const dock = document.getElementById("playerDock")!;
-
-  function setSpacer() {
-    const gap = window.innerHeight - dock.offsetHeight;
-    spacer.style.height = Math.max(0, gap) + "px";
-  }
-
-  setSpacer();
-  window.addEventListener("resize", setSpacer);
-
   // ── LOGO ANIMATION ─────────────────────────
 
   const logoImg = document.getElementById("logoImg");
