@@ -1,22 +1,13 @@
 ---
 import DefaultLayout from "../layouts/default.astro";
 import RadioPlayer from "../components/radio-player.astro";
+import { getCollection } from "astro:content";
 
-const tracks = [
-  {
-    artist: "BOB DYLAN",
-    title:
-      "LIKE A ROLLING STONE THAT CALLED ME TOO MANY TIMES TRYING TO ORDER PIZZA",
-  },
-  { artist: "MATT CHAMPION", title: "SLUG" },
-  { artist: "GORILLAZ", title: "TICKER TAPE" },
-  { artist: "QUANTIC", title: "ATLANTIC OSCILLATIONS" },
-  { artist: "MGMT", title: "MOTHER NATURE" },
-  { artist: "VAMPIRE WEEKEND", title: "M79" },
-  { artist: "NOBUO UEMATSU", title: "PRELUDE" },
-  { artist: "KENDRICK LAMAR", title: "LUST." },
-  { artist: "GEESE", title: "COBRA" },
-];
+const recentEpisode = (await getCollection("episodes"))
+  .sort(
+    (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  )
+  .at(0);
 ---
 
 <DefaultLayout>
@@ -31,12 +22,16 @@ const tracks = [
     <a href="https://fruitfly.supply"><img src="/ffs.png" /></a>
   </div>
   <div class="page-flow">
-    <RadioPlayer
-      title="EP01 - THE TELEPHONE "
-      description="Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper"
-      audioSrc="/music.mp3"
-      tracks={tracks}
-    />
+    {
+      recentEpisode && (
+        <RadioPlayer
+          title={recentEpisode.data.title}
+          description={recentEpisode.data.description}
+          audioSrc={recentEpisode.data.audioSrc}
+          tracks={recentEpisode.data.tracks}
+        />
+      )
+    }
   </div>
 </DefaultLayout>
 
