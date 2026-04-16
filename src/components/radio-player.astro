@@ -166,7 +166,7 @@ const playerStyle = [
 
   .player-wrapper {
     --control-scale: 1.45;
-    --player-scale: clamp(0.3, calc(100dvw / 800px), 1);
+    --player-scale: 0.625;
     box-sizing: border-box;
     width: 100%;
     max-width: calc(800px * var(--player-scale));
@@ -175,12 +175,6 @@ const playerStyle = [
     font-family: "OPTIImprovNewWideNine", sans-serif;
     background: #ffecdc;
     border-radius: calc(30px * var(--player-scale));
-  }
-
-  @supports (width: 1cqi) {
-    .player-wrapper {
-      --player-scale: clamp(0.3, calc(100cqi / 800px), 1);
-    }
   }
 
   .player-grid {
@@ -453,6 +447,21 @@ const playerStyle = [
 </style>
 
 <script>
+  /* RESPONSIVE SCALE — computed in JS to avoid CSS calc(length / length)
+     which Firefox rejects as invalid. */
+
+  const _root = document.querySelector(".radio-player-root") as HTMLElement;
+  const _wrapper = _root?.querySelector(".player-wrapper") as HTMLElement;
+
+  if (_root && _wrapper) {
+    const updateScale = () => {
+      const s = Math.max(0.3, Math.min(_root.clientWidth / 800, 1));
+      _wrapper.style.setProperty("--player-scale", String(s));
+    };
+    updateScale();
+    new ResizeObserver(updateScale).observe(_root);
+  }
+
   /* TIME FORMAT */
 
   function formatTime(s: number) {
