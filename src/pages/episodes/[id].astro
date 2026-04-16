@@ -1,0 +1,22 @@
+---
+import { getCollection } from "astro:content";
+import RadioPage from "../../components/radio-page.astro";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: decodeURI("%5Bid%5D") } }, // decodes to "[page]"
+  ];
+}
+
+const { id } = Astro.params;
+
+const episode = (await getCollection("episodes")).find(
+  (episode) => episode.data.number === parseInt(id),
+);
+
+if (!episode) {
+  return Astro.redirect("/");
+}
+---
+
+<RadioPage {...episode.data} />
