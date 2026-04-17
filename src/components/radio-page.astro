@@ -151,7 +151,7 @@ const hasEpisode = title && description && audioSrc && tracks;
   const audio = document.querySelector("audio") as HTMLAudioElement | null;
 
   /** Matches ~800px player artboard; shrinks ring layout on narrow viewports. */
-  const VIZ_REF_PX = 900;
+  const VIZ_REF_PX = 800;
 
   let w: number, h: number, cx: number, cy: number;
   /** Scale for ring geometry (1 at large viewports, smaller on narrow screens). */
