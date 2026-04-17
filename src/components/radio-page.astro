@@ -130,6 +130,16 @@ const hasEpisode = title && description && audioSrc && tracks;
   .ffs img:hover {
     opacity: 80%;
   }
+  
+  @media screen and (max-width: 900px) {
+  .ffs img{
+    position: fixed;
+    left: 50%;
+    bottom: -5px;
+    transform: translate(-50%, -50%);
+    width: 60px;
+  }
+  
 </style>
 
 <script>
@@ -150,7 +160,7 @@ const hasEpisode = title && description && audioSrc && tracks;
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
     cx = w / 2;
-    cy = h / 2;
+    cy = h * 0.55; // 55% down the screen
     vizScale = Math.min(1, Math.min(w, h) / VIZ_REF_PX);
   }
 
