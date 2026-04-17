@@ -165,7 +165,7 @@ const hasEpisode = title && description && audioSrc && tracks;
     const isMobile = w < 900;
     
     vizScale = isMobile
-      ? Math.min(1.2, baseScale * 1.05)  // boost on mobile
+      ? Math.min(1.2, baseScale * 0.8)  // boost on mobile
       : Math.min(1.0, baseScale * 0.9); // reduce on desktop
   }
 
