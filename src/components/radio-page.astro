@@ -162,7 +162,7 @@ const hasEpisode = title && description && audioSrc && tracks;
     h = canvas.height = window.innerHeight;
     cx = w / 2;
     cy = h * 0.55; // 55% down the screen
-    vizScale = Math.max(0.5, Math.min(1.6, h / VIZ_REF_PX));
+    vizScale = Math.min(1, Math.min(w, h) / VIZ_REF_PX);
   }
 
   resize();
