@@ -140,7 +140,6 @@ const hasEpisode = title && description && audioSrc && tracks;
     width: 60px;
   }
   
-  
 </style>
 
 <script>
@@ -286,7 +285,7 @@ const hasEpisode = title && description && audioSrc && tracks;
       ctx.rotate(r.rotation);
       ctx.beginPath();
 
-      const points = 120;
+      const points = 200;
 
       for (let p = 0; p <= points; p++) {
         const angle = (p / points) * Math.PI * 2;
@@ -307,7 +306,7 @@ const hasEpisode = title && description && audioSrc && tracks;
       }
 
       ctx.closePath();
-      ctx.shadowBlur = 6 * s;
+      ctx.shadowBlur = 8 * s;
       ctx.shadowColor = "#ffecdc";
       ctx.strokeStyle = "#ffecdc";
       ctx.lineWidth = (3 + bass * 1 * ease) * s;
