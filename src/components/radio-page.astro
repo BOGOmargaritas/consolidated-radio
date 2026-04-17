@@ -160,13 +160,13 @@ const hasEpisode = title && description && audioSrc && tracks;
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
     cx = w / 2;
-    cy = h * 0.55; // 55% down the screen
+    cy = h * 0.54; // 55% down the screen
     const baseScale = h / VIZ_REF_PX;
-    const isMobile = w < 768;
+    const isMobile = w < 900;
     
     vizScale = isMobile
-      ? Math.min(1.2, baseScale * 1.2)  // boost on mobile
-      : Math.min(1.0, baseScale * 0.85); // reduce on desktop
+      ? Math.min(1.2, baseScale * 1.05)  // boost on mobile
+      : Math.min(1.0, baseScale * 0.9); // reduce on desktop
   }
 
   resize();
