@@ -130,17 +130,25 @@ const hasEpisode = title && description && audioSrc && tracks;
   .ffs img:hover {
     opacity: 80%;
   }
-  
+
   @media screen and (max-width: 900px) {
-  .ffs img{
-   /* position: fixed;
+    .ffs img {
+      /* position: fixed;
     left: 50%;
     bottom: -5px;
     transform: translate(-50%, -50%);
     width: 60px;*/
-    display: none;
+      display: none;
+    }
+
+    .logo img {
+      top: 11vh;
+    }
+
+    nav {
+      top: 23vh;
+    }
   }
-  
 </style>
 
 <script>
@@ -164,10 +172,10 @@ const hasEpisode = title && description && audioSrc && tracks;
     cy = h * 0.54; // 55% down the screen
     const baseScale = h / VIZ_REF_PX;
     const isMobile = w < 900;
-    
+
     vizScale = isMobile
-      ? Math.min(1.2, baseScale * 0.8)  // boost on mobile
-      : Math.min(1.0, baseScale * 0.8); // reduce on desktop
+      ? Math.min(1.2, baseScale * 0.8) // boost on mobile
+      : Math.min(1.0, baseScale * 0.88); // reduce on desktop
   }
 
   resize();
