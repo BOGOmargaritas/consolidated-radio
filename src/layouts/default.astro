@@ -1,10 +1,19 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Consolidated Radio" } = Astro.props;
+const pathname = Astro.url.pathname;
+---
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta name="theme-color" content="#000000" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>EP01 - Telephone</title>
+    <title>{title}</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
@@ -14,26 +23,374 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap" rel="stylesheet" />
+    <style is:inline>
+      @font-face {
+        font-family: "OPTIImprovNewWideNine";
+        src: url("/fonts/OPTIImprovNewWideNine.otf") format("opentype");
+      }
+
+      html {
+        height: 100%;
+      }
+
+      body {
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: black;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background: #000;
+      }
+
+      .logo img {
+        position: fixed;
+        top: 13vh;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 20vh;
+        z-index: 2;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-drag: none;
+        user-drag: none;
+      }
+
+      .site-nav {
+        position: fixed;
+        left: 50%;
+        top: 24.5vh;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        font-size: 10px;
+        font-family: "OPTIImprovNewWideNine";
+        letter-spacing: 2px;
+      }
+
+      .site-nav a {
+        text-decoration: none;
+        color: #ffecdc;
+        opacity: 0.55;
+        transition: opacity 0.25s ease-in-out;
+      }
+
+      .site-nav a:hover {
+        opacity: 0.75;
+      }
+
+      .site-nav a.active {
+        opacity: 1;
+      }
+
+      .nav-sep {
+        color: rgba(255, 236, 220, 0.35);
+        margin: 0 4px;
+      }
+
+      .ffs img {
+        position: fixed;
+        right: 3px;
+        bottom: 20px;
+        width: 55px;
+        z-index: 2;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-drag: none;
+        user-drag: none;
+        transition: opacity 0.25s ease-in-out, transform 0.5s;
+      }
+
+      .ffs img:hover {
+        opacity: 0.8;
+        transform: scale(0.97);
+      }
+
+      @media screen and (max-width: 900px) {
+        .ffs img {
+          display: none;
+        }
+
+        .logo img {
+          top: 11vh;
+        }
+
+        .site-nav {
+          top: 23vh;
+        }
+      }
+    </style>
   </head>
   <body>
+    <canvas id="visualizer"></canvas>
+    <div class="logo">
+      <img id="logoImg" src="/badge-cream-1.png" />
+    </div>
+    <nav class="site-nav">
+      <a href="/" class={pathname === "/" ? "active" : ""}>LATEST</a>
+      <span class="nav-sep">/</span>
+      <a href="/archive/" class={pathname.startsWith("/archive") ? "active" : ""}>ARCHIVE</a>
+    </nav>
+    <div class="ffs">
+      <a href="https://fruitfly.supply"><img src="/ffspin.png" /></a>
+    </div>
     <slot />
   </body>
 </html>
 
-<style>
-  @font-face {
-    font-family: "OPTIImprovNewWideNine";
-    src: url("/fonts/OPTIImprovNewWideNine.otf") format("opentype");
+<script>
+  // ── VISUALIZER ──────────────────────────────
+
+  const canvas = document.getElementById("visualizer") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  const VIZ_REF_PX = 800;
+  let w: number, h: number, cx: number, cy: number;
+  let vizScale = 1;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    cx = w / 2;
+    cy = h * 0.54;
+    const baseScale = h / VIZ_REF_PX;
+    const isMobile = w < 900;
+    vizScale = isMobile
+      ? Math.min(1.2, baseScale * 0.8)
+      : Math.min(1.0, baseScale * 0.82);
   }
 
-  html {
-    height: 100%;
+  resize();
+  window.addEventListener("resize", resize);
+
+  let audioCtx: AudioContext | null = null;
+  let analyser: AnalyserNode | null = null;
+  let freqData: Uint8Array<ArrayBuffer> | null = null;
+  const connectedElements = new WeakSet<HTMLAudioElement>();
+
+  function connectAudio(el: HTMLAudioElement) {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      freqData = new Uint8Array(
+        analyser.frequencyBinCount,
+      ) as Uint8Array<ArrayBuffer>;
+      analyser.connect(audioCtx.destination);
+    }
+    if (connectedElements.has(el)) return;
+    const source = audioCtx.createMediaElementSource(el);
+    source.connect(analyser!);
+    connectedElements.add(el);
+    audioCtx.resume();
   }
 
-  body {
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: black;
+  let playing = false;
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      playing = false;
+    } else {
+      const audios = document.querySelectorAll("audio");
+      playing = Array.from(audios).some((a) => !a.paused);
+    }
+  });
+
+  document.addEventListener("touchstart", () => {
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  });
+
+  document.addEventListener(
+    "play",
+    (e) => {
+      if ((e.target as HTMLElement).tagName === "AUDIO") {
+        connectAudio(e.target as HTMLAudioElement);
+        playing = true;
+        startLogoAnimation();
+      }
+    },
+    true,
+  );
+
+  document.addEventListener(
+    "pause",
+    (e) => {
+      if ((e.target as HTMLElement).tagName === "AUDIO") {
+        playing = false;
+        stopLogoAnimation();
+      }
+    },
+    true,
+  );
+
+  document.addEventListener(
+    "ended",
+    (e) => {
+      if ((e.target as HTMLElement).tagName === "AUDIO") {
+        playing = false;
+        stopLogoAnimation();
+      }
+    },
+    true,
+  );
+
+  // ── PERLIN NOISE ──────────────────────────────
+
+  const perm = new Uint8Array(512);
+  for (let i = 0; i < 256; i++) perm[i] = i;
+  perm.sort(() => Math.random() - 0.5);
+  for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+  function fade(t: number) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
   }
-</style>
+
+  function lerp(a: number, b: number, t: number) {
+    return a + (b - a) * t;
+  }
+
+  function grad(hash: number, x: number, y: number) {
+    const h = hash & 3;
+    return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
+  }
+
+  function noise(x: number, y: number) {
+    let X = Math.floor(x) & 255;
+    let Y = Math.floor(y) & 255;
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    const u = fade(x);
+    const v = fade(y);
+    const a = perm[X] + Y;
+    const b = perm[X + 1] + Y;
+    return lerp(
+      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+      v,
+    );
+  }
+
+  // ── RING DRAWING LOOP ─────────────────────────
+
+  const rings = Array.from({ length: 6 }, (_, i) => ({
+    radius: (i + 1) * 40,
+    speed: 0.002 + i * 0.001,
+    rotation: Math.random() * Math.PI * 2,
+    noiseOffset: Math.random() * 1000,
+    trebleFactor: 1 - i * 0.1,
+  }));
+
+  let ease = 0;
+  const easeSpeed = 0.02;
+  let time = 0;
+
+  function draw() {
+    requestAnimationFrame(draw);
+
+    const bass =
+      analyser && freqData
+        ? (analyser.getByteFrequencyData(freqData),
+          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
+            (freqData.length / 4) /
+            255)
+        : 0;
+
+    const treble =
+      analyser && freqData
+        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
+          ((freqData.length * 3) / 4) /
+          255
+        : 0;
+
+    ease = lerp(ease, playing ? 1 : 0, easeSpeed);
+
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.fillRect(0, 0, w, h);
+
+    if (playing) time += 0.01;
+
+    const s = vizScale;
+
+    rings.forEach((r) => {
+      r.rotation += (r.speed + treble * 0.005) * ease;
+      const currentRadius = r.radius * s + bass * 100 * s * ease;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(r.rotation);
+      ctx.beginPath();
+
+      const points = 200;
+
+      for (let p = 0; p <= points; p++) {
+        const angle = (p / points) * Math.PI * 2;
+        const wiggle =
+          noise(
+            Math.cos(angle) * 5 + r.noiseOffset + time,
+            Math.sin(angle) * 5 + r.noiseOffset + time,
+          ) *
+          15 *
+          s *
+          ease *
+          (1 + treble * 0.5 * r.trebleFactor);
+
+        const x = Math.cos(angle) * (currentRadius + wiggle);
+        const y = Math.sin(angle) * (currentRadius + wiggle);
+
+        p === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+
+      ctx.closePath();
+      ctx.shadowBlur = 8 * s;
+      ctx.shadowColor = "#ffecdc";
+      ctx.strokeStyle = "#ffecdc";
+      ctx.lineWidth = (3 + bass * 1 * ease) * s;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    });
+  }
+
+  draw();
+
+  // ── LOGO ANIMATION ──────────────────────────
+
+  const logoImg = document.getElementById("logoImg") as HTMLImageElement | null;
+
+  const logos = [
+    "/badge-cream-1.png",
+    "/badge-cream-2.png",
+    "/badge-cream-3.png",
+  ];
+
+  let logoIndex = 0;
+  let logoInterval: number | null = null;
+
+  function startLogoAnimation() {
+    if (logoInterval) return;
+    if (!logoImg) return;
+    logoInterval = setInterval(() => {
+      logoIndex = (logoIndex + 1) % logos.length;
+      logoImg.src = logos[logoIndex];
+    }, 1000);
+  }
+
+  function stopLogoAnimation() {
+    if (!logoImg) return;
+    if (!logoInterval) return;
+    clearInterval(logoInterval);
+    logoInterval = null;
+    logoIndex = 0;
+    logoImg.src = logos[0];
+  }
+</script>

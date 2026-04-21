@@ -1,0 +1,567 @@
+---
+import DefaultLayout from "../layouts/default.astro";
+import { getCollection } from "astro:content";
+
+const episodes = (await getCollection("episodes"))
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+---
+
+<DefaultLayout title="Archive — Consolidated Radio">
+  <div class="archive-flow">
+    <div class="archive-content">
+      <div class="ep-list" id="epList">
+        {episodes.map((ep) => {
+          const num = String(ep.data.number).padStart(2, "0");
+          const label = `EP${num}`;
+          const dateStr = new Date(ep.data.date).toLocaleDateString("en-US", {
+            month: "2-digit", day: "2-digit", year: "numeric",
+          }).replace(/\//g, ".");
+          return (
+            <div
+              class="ep-card"
+              data-id={ep.data.number}
+              data-title={ep.data.title}
+              data-date={dateStr}
+              data-desc={ep.data.description}
+              data-tracks={JSON.stringify(ep.data.tracks)}
+              data-audio={ep.data.audioSrc}
+            >
+              <div class="ep-badge">{label}</div>
+              <div class="ep-body">
+                <div class="ep-title">{ep.data.title}</div>
+                <div class="ep-player">
+                  <button class="play-btn" aria-label="Play/pause">
+                    <svg class="play-icon" viewBox="20 8 42 65">
+                      <path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#ffecdc"/>
+                    </svg>
+                  </button>
+                  <div class="scrubber-col">
+                    <div class="scrubber-track">
+                      <div class="scrubber-fill"></div>
+                      <div class="scrubber-thumb"></div>
+                    </div>
+                    <div class="time-row">
+                      <span class="cur-time">00.00</span>
+                      <span class="total-time">00.00</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="ep-foot">
+                  <button class="info-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="info-btn-svg" viewBox="0 0 2000 2000">
+                      <path fill="#ffecdc" d="M1511.78,544.32v1086.67c0,159.11-77.1,230.81-108.18,260.64-295.63,283.73-770.54-70.42-580.71-435.77,94.78-182.43,294.4-235.83,483.56-174.74V210.78c0-113.44,3.52-157.96,27.44-178.43,21.46-18.37,50.91-26.05,78.66-26.89,41.45-1.26,82.26,10.23,121.82,21.26,97.09,27.06,197.79,57.62,278.02,121.1,1.94,1.53,3.86,3.08,5.77,4.65,56.83,46.74,99.92,107.86,127.59,175.86,28.47,69.98,41.02,145.68,43.07,220.95,1.11,40.73-.28,82.03-5.33,122.49-4.27,38.9-23.1,60.76-64.09,51.64l-407.59-179.08Z"/>
+                      <path fill="#ffecdc" d="M94.11,341.38l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
+                      <path fill="#ffecdc" d="M94.11,1072.18l608.87-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
+                      <path fill="#ffecdc" d="M94.11,703.71l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"/>
+                    </svg>
+                    INFO
+                  </button>
+                  <div class="vol-row">
+                    <svg class="vol-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#ffecdc"/>
+                      <path d="M16 9c1.5 1.5 1.5 4.5 0 6" stroke="#ffecdc" stroke-width="2" stroke-linecap="round" fill="none"/>
+                      <path d="M19 7c3 3 3 7 0 10" stroke="#ffecdc" stroke-width="2" stroke-linecap="round" fill="none"/>
+                    </svg>
+                    <div class="vol-track">
+                      <div class="vol-fill"></div>
+                      <div class="vol-thumb"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <audio preload="metadata" src={ep.data.audioSrc}></audio>
+            </div>
+          );
+        })}
+      </div>
+
+      <div class="ep-detail" id="epDetail">
+        <div class="detail-header" id="detailTitle">SELECT AN EPISODE</div>
+        <div class="detail-desc-box" id="detailDesc" style="display:none">
+          <div class="detail-description" id="descText"></div>
+          <div class="detail-date" id="descDate"></div>
+        </div>
+        <div class="detail-track-box" id="detailTrack" style="display:none">
+          <div class="tracklist-label">TRACKLIST:</div>
+          <div class="tracklist" id="tracklistEl"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DefaultLayout>
+
+<style>
+  .archive-flow {
+    position: relative;
+    z-index: 1;
+    min-height: 100dvh;
+    padding-top: 30vh;
+    box-sizing: border-box;
+  }
+
+  .archive-content {
+    display: grid;
+    grid-template-columns: 460px 1fr;
+    gap: 0;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .ep-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 24px;
+    max-height: 68vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c23b22 #1a1a1a;
+  }
+  .ep-list::-webkit-scrollbar { width: 4px; }
+  .ep-list::-webkit-scrollbar-thumb { background: #c23b22; border-radius: 2px; }
+  .ep-list::-webkit-scrollbar-track { background: transparent; }
+
+  .ep-card {
+    display: flex;
+    align-items: stretch;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 236, 220, 0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    backdrop-filter: blur(8px);
+  }
+  .ep-card:hover { border-color: rgba(255, 236, 220, 0.5); }
+  .ep-card.active { border-color: #ffecdc; background: rgba(0, 0, 0, 0.85); }
+
+  .ep-badge {
+    width: 62px;
+    flex-shrink: 0;
+    background: #c23b22;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: #ffecdc;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 8px 0;
+    border-radius: 0 14px 14px 0;
+  }
+  .ep-card.active .ep-badge { background: #8b1a1f; }
+
+  .ep-body {
+    flex: 1;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ep-title {
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    color: #ffecdc;
+    line-height: 1.1;
+  }
+
+  .ep-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .play-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .play-icon {
+    display: block;
+    width: 28px;
+    height: 28px;
+  }
+
+  .scrubber-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .scrubber-track {
+    height: 4px;
+    background: rgba(255, 236, 220, 0.2);
+    border-radius: 100px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .scrubber-fill {
+    height: 100%;
+    background: #ffecdc;
+    border-radius: 100px;
+    width: 0%;
+  }
+
+  .scrubber-thumb {
+    width: 10px;
+    height: 10px;
+    background: #ffecdc;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    transform: translate(-50%, -50%);
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: 0.45rem;
+    color: rgba(255, 236, 220, 0.5);
+    letter-spacing: 0.04em;
+  }
+
+  .ep-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .info-btn {
+    background: none;
+    border: none;
+    color: #ffecdc;
+    font-size: 0.5rem;
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+  .info-btn:hover { opacity: 1; }
+
+  .info-btn-svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  .vol-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .vol-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .vol-track {
+    width: 50px;
+    height: 4px;
+    background: rgba(255, 236, 220, 0.2);
+    border-radius: 100px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .vol-fill {
+    height: 100%;
+    background: #ffecdc;
+    border-radius: 100px;
+    width: 80%;
+  }
+
+  .vol-thumb {
+    width: 10px;
+    height: 10px;
+    background: #ffecdc;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 80%;
+    transform: translate(-50%, -50%);
+  }
+
+  .ep-detail {
+    padding-left: 24px;
+    border-left: 2px solid rgba(255, 236, 220, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .detail-header {
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: #ffecdc;
+    border-bottom: 2px solid #ffecdc;
+    padding-bottom: 12px;
+  }
+
+  .detail-desc-box {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(255, 236, 220, 0.15);
+    border-radius: 16px;
+    padding: 18px 20px;
+    backdrop-filter: blur(8px);
+  }
+
+  .detail-description {
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: 0.6rem;
+    line-height: 1.6;
+    color: rgba(255, 236, 220, 0.85);
+    letter-spacing: 0.02em;
+  }
+
+  .detail-date {
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    color: rgba(255, 236, 220, 0.4);
+    margin-top: 12px;
+  }
+
+  .detail-track-box {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(255, 236, 220, 0.15);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+  }
+
+  .tracklist-label {
+    padding: 14px 20px 8px;
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: rgba(255, 236, 220, 0.6);
+  }
+
+  .tracklist {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tracklist :global(.track-row) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px;
+    border-top: 1px solid rgba(255, 236, 220, 0.1);
+    transition: padding-left 0.15s;
+  }
+  .tracklist :global(.track-row:hover) { padding-left: 26px; }
+
+  .tracklist :global(.dot) {
+    width: 6px;
+    height: 6px;
+    background: #c23b22;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .tracklist :global(.track-name) {
+    font-family: "OPTIImprovNewWideNine", sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    color: #ffecdc;
+  }
+
+  @media (max-width: 900px) {
+    .archive-flow { padding-top: 28vh; }
+
+    .archive-content {
+      grid-template-columns: 1fr;
+      padding: 0 14px 40px;
+    }
+
+    .ep-list {
+      padding-right: 0;
+      padding-bottom: 16px;
+      max-height: 50vh;
+    }
+
+    .ep-detail {
+      padding-left: 0;
+      border-left: none;
+      border-top: 2px solid rgba(255, 236, 220, 0.15);
+      padding-top: 20px;
+    }
+  }
+</style>
+
+<script>
+  const PLAY_PATH = '<path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#ffecdc"/>';
+  const PAUSE_PATH = '<rect x="22" y="18" width="12" height="44" rx="4" fill="#ffecdc"/><rect x="44" y="18" width="12" height="44" rx="4" fill="#ffecdc"/>';
+
+  const cards = document.querySelectorAll<HTMLDivElement>(".ep-card");
+  let activeCard: HTMLDivElement | null = null;
+  let playingCard: HTMLDivElement | null = null;
+
+  function formatTime(s: number): string {
+    if (!isFinite(s) || s < 0) return "00.00";
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = Math.floor(s % 60);
+    if (h > 0) return `${String(h).padStart(2, "0")}.${String(m).padStart(2, "0")}.${String(sec).padStart(2, "0")}`;
+    return `${String(m).padStart(2, "0")}.${String(sec).padStart(2, "0")}`;
+  }
+
+  function selectEpisode(card: HTMLDivElement) {
+    cards.forEach(c => c.classList.remove("active"));
+    card.classList.add("active");
+    activeCard = card;
+
+    const title = card.dataset.title!;
+    const desc = card.dataset.desc!;
+    const date = card.dataset.date!;
+    const tracks: { artist: string; title: string }[] = JSON.parse(card.dataset.tracks!);
+
+    document.getElementById("detailTitle")!.textContent = title;
+    document.getElementById("descText")!.textContent = desc;
+    document.getElementById("descDate")!.textContent = date;
+    document.getElementById("detailDesc")!.style.display = "";
+    document.getElementById("detailTrack")!.style.display = "";
+
+    const tl = document.getElementById("tracklistEl")!;
+    tl.innerHTML = tracks
+      .map(t => `<div class="track-row"><div class="dot"></div><div class="track-name">${t.artist} - ${t.title}</div></div>`)
+      .join("");
+  }
+
+  function stopPlaying() {
+    if (!playingCard) return;
+    const audio = playingCard.querySelector("audio")!;
+    audio.pause();
+    const icon = playingCard.querySelector(".play-icon")!;
+    icon.innerHTML = PLAY_PATH;
+    playingCard = null;
+  }
+
+  function togglePlay(card: HTMLDivElement) {
+    const audio = card.querySelector("audio")!;
+    const icon = card.querySelector(".play-icon")!;
+
+    if (playingCard === card) {
+      audio.pause();
+      icon.innerHTML = PLAY_PATH;
+      playingCard = null;
+    } else {
+      if (playingCard) stopPlaying();
+      audio.play();
+      icon.innerHTML = PAUSE_PATH;
+      playingCard = card;
+    }
+  }
+
+  cards.forEach(card => {
+    const audio = card.querySelector("audio")!;
+    const scrubberTrack = card.querySelector<HTMLElement>(".scrubber-track")!;
+    const scrubberFill = card.querySelector<HTMLElement>(".scrubber-fill")!;
+    const scrubberThumb = card.querySelector<HTMLElement>(".scrubber-thumb")!;
+    const curTime = card.querySelector(".cur-time")!;
+    const totalTime = card.querySelector(".total-time")!;
+    const volTrack = card.querySelector<HTMLElement>(".vol-track")!;
+    const volFill = card.querySelector<HTMLElement>(".vol-fill")!;
+    const volThumb = card.querySelector<HTMLElement>(".vol-thumb")!;
+    const playBtn = card.querySelector<HTMLButtonElement>(".play-btn")!;
+    const infoBtn = card.querySelector<HTMLButtonElement>(".info-btn")!;
+
+    audio.volume = 0.8;
+    let dragging = false;
+    let volDrag = false;
+
+    audio.addEventListener("loadedmetadata", () => {
+      totalTime.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (!audio.duration || dragging) return;
+      const pct = (audio.currentTime / audio.duration) * 100;
+      scrubberFill.style.width = pct + "%";
+      scrubberThumb.style.left = pct + "%";
+      curTime.textContent = formatTime(audio.currentTime);
+    });
+
+    audio.addEventListener("ended", () => {
+      const icon = card.querySelector(".play-icon")!;
+      icon.innerHTML = PLAY_PATH;
+      scrubberFill.style.width = "0%";
+      scrubberThumb.style.left = "0%";
+      curTime.textContent = "00.00";
+      if (playingCard === card) playingCard = null;
+    });
+
+    function updateScrub(x: number) {
+      const rect = scrubberTrack.getBoundingClientRect();
+      let pct = (x - rect.left) / rect.width;
+      pct = Math.max(0, Math.min(1, pct));
+      if (audio.duration) audio.currentTime = pct * audio.duration;
+      scrubberFill.style.width = pct * 100 + "%";
+      scrubberThumb.style.left = pct * 100 + "%";
+    }
+
+    scrubberTrack.addEventListener("mousedown", (e) => { dragging = true; updateScrub(e.clientX); });
+    window.addEventListener("mousemove", (e) => { if (dragging) updateScrub(e.clientX); });
+    window.addEventListener("mouseup", () => { dragging = false; });
+
+    function updateVol(x: number) {
+      const rect = volTrack.getBoundingClientRect();
+      let pct = (x - rect.left) / rect.width;
+      pct = Math.max(0, Math.min(1, pct));
+      audio.volume = pct;
+      volFill.style.width = pct * 100 + "%";
+      volThumb.style.left = pct * 100 + "%";
+    }
+
+    volTrack.addEventListener("mousedown", (e) => { volDrag = true; updateVol(e.clientX); e.stopPropagation(); });
+    window.addEventListener("mousemove", (e) => { if (volDrag) updateVol(e.clientX); });
+    window.addEventListener("mouseup", () => { volDrag = false; });
+
+    playBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      togglePlay(card as HTMLDivElement);
+    });
+
+    infoBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectEpisode(card as HTMLDivElement);
+    });
+
+    card.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest(".play-btn") || target.closest(".scrubber-track") || target.closest(".vol-track") || target.closest(".info-btn")) return;
+      selectEpisode(card as HTMLDivElement);
+    });
+  });
+
+  if (cards.length > 0) {
+    selectEpisode(cards[0] as HTMLDivElement);
+  }
+</script>
