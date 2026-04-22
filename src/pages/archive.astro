@@ -6,7 +6,7 @@ const episodes = (await getCollection("episodes"))
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 ---
 
-<DefaultLayout title="Archive — Consolidated Radio">
+<DefaultLayout title="Archive — Consolidated Radio" hideVisualizer>
   <div class="archive-flow">
     <div class="archive-content">
       <div class="ep-list" id="epList">

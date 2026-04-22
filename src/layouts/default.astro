@@ -1,9 +1,10 @@
 ---
 interface Props {
   title?: string;
+  hideVisualizer?: boolean;
 }
 
-const { title = "Consolidated Radio" } = Astro.props;
+const { title = "Consolidated Radio", hideVisualizer = false } = Astro.props;
 const pathname = Astro.url.pathname;
 ---
 
@@ -90,10 +91,6 @@ const pathname = Astro.url.pathname;
         opacity: 1;
       }
 
-      .nav-sep {
-        color: rgba(255, 236, 220, 0.35);
-        margin: 0 4px;
-      }
 
       .ffs img {
         position: fixed;
@@ -131,13 +128,11 @@ const pathname = Astro.url.pathname;
     </style>
   </head>
   <body>
-    <canvas id="visualizer"></canvas>
-    <div class="logo">
+    {!hideVisualizer && <canvas id="visualizer"></canvas>}
+    <a href="/" class="logo">
       <img id="logoImg" src="/badge-cream-1.png" />
-    </div>
+    </a>
     <nav class="site-nav">
-      <a href="/" class={pathname === "/" ? "active" : ""}>LATEST</a>
-      <span class="nav-sep">/</span>
       <a href="/archive/" class={pathname.startsWith("/archive") ? "active" : ""}>ARCHIVE</a>
     </nav>
     <div class="ffs">
@@ -150,218 +145,220 @@ const pathname = Astro.url.pathname;
 <script>
   // ── VISUALIZER ──────────────────────────────
 
-  const canvas = document.getElementById("visualizer") as HTMLCanvasElement;
-  const ctx = canvas.getContext("2d")!;
-
-  const VIZ_REF_PX = 800;
-  let w: number, h: number, cx: number, cy: number;
-  let vizScale = 1;
-
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-    cx = w / 2;
-    cy = h * 0.54;
-    const baseScale = h / VIZ_REF_PX;
-    const isMobile = w < 900;
-    vizScale = isMobile
-      ? Math.min(1.2, baseScale * 0.8)
-      : Math.min(1.0, baseScale * 0.82);
-  }
-
-  resize();
-  window.addEventListener("resize", resize);
+  const canvas = document.getElementById("visualizer") as HTMLCanvasElement | null;
 
   let audioCtx: AudioContext | null = null;
   let analyser: AnalyserNode | null = null;
   let freqData: Uint8Array<ArrayBuffer> | null = null;
   const connectedElements = new WeakSet<HTMLAudioElement>();
-
-  function connectAudio(el: HTMLAudioElement) {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 512;
-      freqData = new Uint8Array(
-        analyser.frequencyBinCount,
-      ) as Uint8Array<ArrayBuffer>;
-      analyser.connect(audioCtx.destination);
-    }
-    if (connectedElements.has(el)) return;
-    const source = audioCtx.createMediaElementSource(el);
-    source.connect(analyser!);
-    connectedElements.add(el);
-    audioCtx.resume();
-  }
-
   let playing = false;
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
-      playing = false;
-    } else {
-      const audios = document.querySelectorAll("audio");
-      playing = Array.from(audios).some((a) => !a.paused);
+  if (canvas) {
+    const ctx = canvas.getContext("2d")!;
+
+    const VIZ_REF_PX = 800;
+    let w: number, h: number, cx: number, cy: number;
+    let vizScale = 1;
+
+    function resize() {
+      w = canvas!.width = window.innerWidth;
+      h = canvas!.height = window.innerHeight;
+      cx = w / 2;
+      cy = h * 0.54;
+      const baseScale = h / VIZ_REF_PX;
+      const isMobile = w < 900;
+      vizScale = isMobile
+        ? Math.min(1.2, baseScale * 0.8)
+        : Math.min(1.0, baseScale * 0.82);
     }
-  });
 
-  document.addEventListener("touchstart", () => {
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-  });
+    resize();
+    window.addEventListener("resize", resize);
 
-  document.addEventListener(
-    "play",
-    (e) => {
-      if ((e.target as HTMLElement).tagName === "AUDIO") {
-        connectAudio(e.target as HTMLAudioElement);
-        playing = true;
-        startLogoAnimation();
+    function connectAudio(el: HTMLAudioElement) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        freqData = new Uint8Array(
+          analyser.frequencyBinCount,
+        ) as Uint8Array<ArrayBuffer>;
+        analyser.connect(audioCtx.destination);
       }
-    },
-    true,
-  );
+      if (connectedElements.has(el)) return;
+      const source = audioCtx.createMediaElementSource(el);
+      source.connect(analyser!);
+      connectedElements.add(el);
+      audioCtx.resume();
+    }
 
-  document.addEventListener(
-    "pause",
-    (e) => {
-      if ((e.target as HTMLElement).tagName === "AUDIO") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
         playing = false;
-        stopLogoAnimation();
+      } else {
+        const audios = document.querySelectorAll("audio");
+        playing = Array.from(audios).some((a) => !a.paused);
       }
-    },
-    true,
-  );
-
-  document.addEventListener(
-    "ended",
-    (e) => {
-      if ((e.target as HTMLElement).tagName === "AUDIO") {
-        playing = false;
-        stopLogoAnimation();
-      }
-    },
-    true,
-  );
-
-  // ── PERLIN NOISE ──────────────────────────────
-
-  const perm = new Uint8Array(512);
-  for (let i = 0; i < 256; i++) perm[i] = i;
-  perm.sort(() => Math.random() - 0.5);
-  for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
-
-  function fade(t: number) {
-    return t * t * t * (t * (t * 6 - 15) + 10);
-  }
-
-  function lerp(a: number, b: number, t: number) {
-    return a + (b - a) * t;
-  }
-
-  function grad(hash: number, x: number, y: number) {
-    const h = hash & 3;
-    return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
-  }
-
-  function noise(x: number, y: number) {
-    let X = Math.floor(x) & 255;
-    let Y = Math.floor(y) & 255;
-    x -= Math.floor(x);
-    y -= Math.floor(y);
-    const u = fade(x);
-    const v = fade(y);
-    const a = perm[X] + Y;
-    const b = perm[X + 1] + Y;
-    return lerp(
-      lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
-      lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
-      v,
-    );
-  }
-
-  // ── RING DRAWING LOOP ─────────────────────────
-
-  const rings = Array.from({ length: 6 }, (_, i) => ({
-    radius: (i + 1) * 40,
-    speed: 0.002 + i * 0.001,
-    rotation: Math.random() * Math.PI * 2,
-    noiseOffset: Math.random() * 1000,
-    trebleFactor: 1 - i * 0.1,
-  }));
-
-  let ease = 0;
-  const easeSpeed = 0.02;
-  let time = 0;
-
-  function draw() {
-    requestAnimationFrame(draw);
-
-    const bass =
-      analyser && freqData
-        ? (analyser.getByteFrequencyData(freqData),
-          freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
-            (freqData.length / 4) /
-            255)
-        : 0;
-
-    const treble =
-      analyser && freqData
-        ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
-          ((freqData.length * 3) / 4) /
-          255
-        : 0;
-
-    ease = lerp(ease, playing ? 1 : 0, easeSpeed);
-
-    ctx.fillStyle = "rgba(0,0,0,0.15)";
-    ctx.fillRect(0, 0, w, h);
-
-    if (playing) time += 0.01;
-
-    const s = vizScale;
-
-    rings.forEach((r) => {
-      r.rotation += (r.speed + treble * 0.005) * ease;
-      const currentRadius = r.radius * s + bass * 100 * s * ease;
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(r.rotation);
-      ctx.beginPath();
-
-      const points = 200;
-
-      for (let p = 0; p <= points; p++) {
-        const angle = (p / points) * Math.PI * 2;
-        const wiggle =
-          noise(
-            Math.cos(angle) * 5 + r.noiseOffset + time,
-            Math.sin(angle) * 5 + r.noiseOffset + time,
-          ) *
-          15 *
-          s *
-          ease *
-          (1 + treble * 0.5 * r.trebleFactor);
-
-        const x = Math.cos(angle) * (currentRadius + wiggle);
-        const y = Math.sin(angle) * (currentRadius + wiggle);
-
-        p === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-
-      ctx.closePath();
-      ctx.shadowBlur = 8 * s;
-      ctx.shadowColor = "#ffecdc";
-      ctx.strokeStyle = "#ffecdc";
-      ctx.lineWidth = (3 + bass * 1 * ease) * s;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.restore();
     });
-  }
 
-  draw();
+    document.addEventListener("touchstart", () => {
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    });
+
+    document.addEventListener(
+      "play",
+      (e) => {
+        if ((e.target as HTMLElement).tagName === "AUDIO") {
+          connectAudio(e.target as HTMLAudioElement);
+          playing = true;
+          startLogoAnimation();
+        }
+      },
+      true,
+    );
+
+    document.addEventListener(
+      "pause",
+      (e) => {
+        if ((e.target as HTMLElement).tagName === "AUDIO") {
+          playing = false;
+          stopLogoAnimation();
+        }
+      },
+      true,
+    );
+
+    document.addEventListener(
+      "ended",
+      (e) => {
+        if ((e.target as HTMLElement).tagName === "AUDIO") {
+          playing = false;
+          stopLogoAnimation();
+        }
+      },
+      true,
+    );
+
+    // ── PERLIN NOISE ──────────────────────────────
+
+    const perm = new Uint8Array(512);
+    for (let i = 0; i < 256; i++) perm[i] = i;
+    perm.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+    function fade(t: number) {
+      return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+
+    function lerp(a: number, b: number, t: number) {
+      return a + (b - a) * t;
+    }
+
+    function grad(hash: number, x: number, y: number) {
+      const h = hash & 3;
+      return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
+    }
+
+    function noise(x: number, y: number) {
+      let X = Math.floor(x) & 255;
+      let Y = Math.floor(y) & 255;
+      x -= Math.floor(x);
+      y -= Math.floor(y);
+      const u = fade(x);
+      const v = fade(y);
+      const a = perm[X] + Y;
+      const b = perm[X + 1] + Y;
+      return lerp(
+        lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
+        lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
+        v,
+      );
+    }
+
+    // ── RING DRAWING LOOP ─────────────────────────
+
+    const rings = Array.from({ length: 6 }, (_, i) => ({
+      radius: (i + 1) * 40,
+      speed: 0.002 + i * 0.001,
+      rotation: Math.random() * Math.PI * 2,
+      noiseOffset: Math.random() * 1000,
+      trebleFactor: 1 - i * 0.1,
+    }));
+
+    let ease = 0;
+    const easeSpeed = 0.02;
+    let time = 0;
+
+    function draw() {
+      requestAnimationFrame(draw);
+
+      const bass =
+        analyser && freqData
+          ? (analyser.getByteFrequencyData(freqData),
+            freqData.slice(0, freqData.length / 4).reduce((a, b) => a + b) /
+              (freqData.length / 4) /
+              255)
+          : 0;
+
+      const treble =
+        analyser && freqData
+          ? freqData.slice(freqData.length / 4).reduce((a, b) => a + b) /
+            ((freqData.length * 3) / 4) /
+            255
+          : 0;
+
+      ease = lerp(ease, playing ? 1 : 0, easeSpeed);
+
+      ctx.fillStyle = "rgba(0,0,0,0.15)";
+      ctx.fillRect(0, 0, w, h);
+
+      if (playing) time += 0.01;
+
+      const s = vizScale;
+
+      rings.forEach((r) => {
+        r.rotation += (r.speed + treble * 0.005) * ease;
+        const currentRadius = r.radius * s + bass * 100 * s * ease;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(r.rotation);
+        ctx.beginPath();
+
+        const points = 200;
+
+        for (let p = 0; p <= points; p++) {
+          const angle = (p / points) * Math.PI * 2;
+          const wiggle =
+            noise(
+              Math.cos(angle) * 5 + r.noiseOffset + time,
+              Math.sin(angle) * 5 + r.noiseOffset + time,
+            ) *
+            15 *
+            s *
+            ease *
+            (1 + treble * 0.5 * r.trebleFactor);
+
+          const x = Math.cos(angle) * (currentRadius + wiggle);
+          const y = Math.sin(angle) * (currentRadius + wiggle);
+
+          p === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+
+        ctx.closePath();
+        ctx.shadowBlur = 8 * s;
+        ctx.shadowColor = "#ffecdc";
+        ctx.strokeStyle = "#ffecdc";
+        ctx.lineWidth = (3 + bass * 1 * ease) * s;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      });
+    }
+
+    draw();
+  }
 
   // ── LOGO ANIMATION ──────────────────────────
 
