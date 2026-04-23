@@ -186,11 +186,18 @@ const pathname = Astro.url.pathname;
       h = canvas!.height = window.innerHeight;
       cx = w / 2;
       cy = h * 0.54;
+
       const baseScale = h / VIZ_REF_PX;
       const isMobile = w < 900;
+      const isTall = h > 1200;
+
+      cy = isTall ? h * 0.563 : h * 0.54;
+
       vizScale = isMobile
         ? Math.min(1.2, baseScale * 0.8)
-        : Math.min(1.0, baseScale * 0.82);
+        : isTall
+          ? baseScale * 0.82 * 1.04 // scales up on tall screens (no cap)
+          : Math.min(1.0, baseScale * 0.82);
     }
 
     resize();
