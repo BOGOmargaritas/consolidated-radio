@@ -3,6 +3,7 @@ interface Props {
   title: string;
   description: string;
   audioSrc: string;
+  image: string;
   tracks: {
     artist: string;
     title: string;
@@ -19,6 +20,7 @@ const {
   title,
   description,
   audioSrc,
+  image,
   tracks,
   scale,
   controlScale,
@@ -31,6 +33,8 @@ const playerStyle = [
 ]
   .filter(Boolean)
   .join("; ");
+
+  console.log(image);
 ---
 
 <div class="radio-player-root">
@@ -42,7 +46,9 @@ const playerStyle = [
     data-fixed-scale={scale != null ? "" : undefined}
   >
     <div class="player-grid">
-      <div class="art-col"></div>
+      <div class="art-col">
+        <img src={image} alt={title} />
+      </div>
 
       <div class="right-col">
         <div class="header">

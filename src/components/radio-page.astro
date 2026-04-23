@@ -6,13 +6,15 @@ interface Props {
   title?: string;
   description?: string;
   audioSrc?: string;
+  image?: string;
   tracks?: {
     artist: string;
     title: string;
   }[];
 }
 
-const { title, description, audioSrc, tracks } = Astro.props;
+const { title, description, audioSrc, tracks, image } = Astro.props;
+console.log(image);
 const hasEpisode = title && description && audioSrc && tracks;
 ---
 
@@ -22,6 +24,7 @@ const hasEpisode = title && description && audioSrc && tracks;
       hasEpisode && (
         <RadioPlayer
           title={title!}
+          image={image!}
           description={description!}
           audioSrc={audioSrc!}
           tracks={tracks!}

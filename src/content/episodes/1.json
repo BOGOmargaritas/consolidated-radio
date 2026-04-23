@@ -3,6 +3,7 @@
   "title": "EP01 - THE TELEPHONE",
   "date": "2026-04-15",
   "description": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper",
+  "image": "/episode-icons/1.png",
   "audioSrc": "/music.mp3",
   "tracks": [
     {

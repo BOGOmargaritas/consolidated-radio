@@ -9,6 +9,7 @@ const episodes = defineCollection({
     title: z.string(),
     description: z.string(),
     audioSrc: z.string(),
+    image: z.string(),
     tracks: z.array(z.object({
       artist: z.string(),
       title: z.string(),
