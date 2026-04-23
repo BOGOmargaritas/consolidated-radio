@@ -1,6 +1,6 @@
 {
   "number": 1,
-  "title": "EP01 - Salad Days",
+  "title": "EP01 - SALAD DAYS",
   "date": "2026-04-22",
   "description": "It's Spring time! Episode 01 is a collection of music all relating to or invoking the spirit of Sping.",
   "image": "/episode-icons/1.png",
@@ -8,55 +8,55 @@
   "tracks": [
     {
       "artist": "EMEFE",
-      "title": "Do Your Dance"
+      "title": "DO YOUR DANCE"
     },
     {
-      "artist": "Art Garfunkle",
-      "title": "Waters of March"
+      "artist": "ART GARFUNKLE",
+      "title": "WATERS OF MARCH"
     },
     {
-      "artist": "Fleetwood Mac",
-      "title": "Dreams"
+      "artist": "FLEETWOOD MAC",
+      "title": "DREAMS"
     },
     {
       "artist": "MGMT",
-      "title": "Mother Nature"
+      "title": "MOTHER NATURE"
     },
     {
-      "artist": "Psychic TV",
-      "title": "The Orchids"
+      "artist": "PSYCHIC TV",
+      "title": "THE ORCHIDS"
     },
     {
-      "artist": "Budapest Symphonic Orchestra",
-      "title": "The Raindrop Flower"
+      "artist": "BUDAPEST SYMPHONIC ORCHESTRA",
+      "title": "THE RAINDROP FLOWER"
     },
     {
-      "artist": "Dark Dazey",
-      "title": "Chameleon"
+      "artist": "DARK DAZEY",
+      "title": "CHAMELEON"
     },
     {
-      "artist": "Black Country, New Road",
-      "title": "The Big Spin"
+      "artist": "BLACK COUNTRY, NEW ROAD",
+      "title": "THE BIG SPIN"
     },
     {
-      "artist": "Vampire Weekend",
-      "title": "Flower Moon"
+      "artist": "VAMPIRE WEEKEND",
+      "title": "FLOWER MOON"
     },
     {
-      "artist": "Daryl Hall & John Oates",
-      "title": "Lady Rain"
+      "artist": "DARYL HALL & JOHN OATES",
+      "title": "LADY RAIN"
     },
     {
-      "artist": "Kumi Miyasoto",
-      "title": "Rainy Boy"
+      "artist": "KUMI MIYASOTO",
+      "title": "RAINY BOY"
     },
     {
-      "artist": "Idris Muhammad",
-      "title": "Could Heaven Ever Be Like This"
+      "artist": "IDRIS MUHAMMAD",
+      "title": "COULD HEAVEN EVER BE LIKE THIS"
     },
     {
-      "artist": "Mat Clark",
-      "title": "The Gardens (LBP1 Mix)"
+      "artist": "MAT CLARK",
+      "title": "THE GARDENS (LBP1 MIX)"
     }
   ]
 }
