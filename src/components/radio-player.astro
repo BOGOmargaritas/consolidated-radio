@@ -11,9 +11,11 @@ interface Props {
   scale?: number;
   /** When set, overrides default control sizing multiplier. */
   controlScale?: number;
+  /** Hides the built-in info panel (description + tracklist). */
+  hideInfoPanel?: boolean;
 }
 
-const { title, description, audioSrc, tracks, scale, controlScale } =
+const { title, description, audioSrc, tracks, scale, controlScale, hideInfoPanel = false } =
   Astro.props;
 
 const playerStyle = [
@@ -25,7 +27,8 @@ const playerStyle = [
 ---
 
 <div class="radio-player-root">
-  <div class="player-wrapper" style={playerStyle || undefined}>
+  <audio src={audioSrc} playsinline webkit-playsinline preload="metadata"></audio>
+  <div class="player-wrapper" style={playerStyle || undefined} data-fixed-scale={scale != null ? "" : undefined}>
     <div class="player-grid">
       <div class="art-col"></div>
 
@@ -37,8 +40,8 @@ const playerStyle = [
         <div class="player">
           <div class="player-controls">
             <div class="transport">
-              <button class="play-btn" id="playBtn">
-                <svg id="playIcon" viewBox="20 8 42 65">
+              <button class="play-btn">
+                <svg class="play-icon" viewBox="20 8 42 65">
                   <path
                     d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z"
                     fill="#ffecdc"></path>
@@ -46,19 +49,19 @@ const playerStyle = [
               </button>
 
               <div class="scrubber-col">
-                <div class="scrubber-track" id="scrubber">
-                  <div class="scrubber-fill" id="sFill"></div>
-                  <div class="scrubber-thumb" id="sThumb"></div>
+                <div class="scrubber-track">
+                  <div class="scrubber-fill"></div>
+                  <div class="scrubber-thumb"></div>
                 </div>
                 <div class="time-row">
-                  <span id="tCur">00.00</span>
-                  <span id="tEnd">00.00</span>
+                  <span class="time-cur">00.00</span>
+                  <span class="time-end">00.00</span>
                 </div>
               </div>
             </div>
 
             <div class="bottom-row">
-              <button class="info-btn" id="infoBtn">
+              <button class="info-btn">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="info-btn-svg"
@@ -102,9 +105,9 @@ const playerStyle = [
                     fill="none"></path>
                 </svg>
 
-                <div class="vol-track" id="volTrack">
-                  <div class="vol-fill" id="vFill"></div>
-                  <div class="vol-thumb" id="vThumb"></div>
+                <div class="vol-track">
+                  <div class="vol-fill"></div>
+                  <div class="vol-thumb"></div>
                 </div>
               </div>
             </div>
@@ -113,31 +116,31 @@ const playerStyle = [
       </div>
     </div>
 
-    <div class="info-panel" id="infoPanel">
-      <div class="description">
-        {description}
-      </div>
+    {!hideInfoPanel && (
+      <div class="info-panel">
+        <div class="description">
+          {description}
+        </div>
 
-      <div class="tracklist-section">
-        <div class="tracklist-label">TRACKLIST:</div>
-        <div class="tracklist">
-          {
-            tracks.map(({ artist, title }) => (
-              <div class="track-row">
-                <div class="dot" />
-                <div class="track-name">
-                  {artist} - {title}
+        <div class="tracklist-section">
+          <div class="tracklist-label">TRACKLIST:</div>
+          <div class="tracklist">
+            {
+              tracks.map(({ artist, title }) => (
+                <div class="track-row">
+                  <div class="dot" />
+                  <div class="track-name">
+                    {artist} - {title}
+                  </div>
                 </div>
-              </div>
-            ))
-          }
+              ))
+            }
+          </div>
         </div>
       </div>
-    </div>
+    )}
   </div>
 </div>
-
-<audio id="audio" src={audioSrc} playsinline webkit-playsinline></audio>
 
 <style>
   @font-face {
@@ -147,14 +150,12 @@ const playerStyle = [
     font-style: normal;
   }
 
-  /* Full ~800px design at scale 1; shrinks when the root is narrower than 800px. */
   .radio-player-root {
     container-type: inline-size;
     flex-shrink: 0;
     width: min(420px, calc(100vw - 24px));
     box-sizing: border-box;
     margin-inline: auto;
-    /*padding-bottom: max(24px, 3dvh);*/
     padding-bottom: 30px;
     pointer-events: auto;
   }
@@ -242,7 +243,7 @@ const playerStyle = [
     width: 100%;
   }
 
-  #playIcon {
+  .play-icon {
     display: block;
     width: calc(52px * var(--ctrl));
     height: calc(80px * var(--ctrl));
@@ -449,22 +450,8 @@ const playerStyle = [
 </style>
 
 <script>
-  /* RESPONSIVE SCALE — computed in JS to avoid CSS calc(length / length)
-     which Firefox rejects as invalid. */
-
-  const _root = document.querySelector(".radio-player-root") as HTMLElement;
-  const _wrapper = _root?.querySelector(".player-wrapper") as HTMLElement;
-
-  if (_root && _wrapper) {
-    const updateScale = () => {
-      const s = Math.max(0.3, Math.min(_root.clientWidth / 800, 1));
-      _wrapper.style.setProperty("--player-scale", String(s));
-    };
-    updateScale();
-    new ResizeObserver(updateScale).observe(_root);
-  }
-
-  /* TIME FORMAT */
+  const PLAY = `<path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#ffecdc"/>`;
+  const PAUSE = `<rect x="22" y="18" width="12" height="44" rx="4" fill="#ffecdc"/><rect x="44" y="18" width="12" height="44" rx="4" fill="#ffecdc"/>`;
 
   function formatTime(s: number) {
     if (isNaN(s) || s < 0) return "00.00";
@@ -477,116 +464,140 @@ const playerStyle = [
     return `${String(m).padStart(2, "0")}.${String(sec).padStart(2, "0")}`;
   }
 
-  /* INFO TOGGLE */
+  document.querySelectorAll<HTMLElement>(".radio-player-root").forEach((root) => {
+    const wrapper = root.querySelector<HTMLElement>(".player-wrapper")!;
+    const audio = root.querySelector<HTMLAudioElement>("audio")!;
+    const playBtn = root.querySelector<HTMLButtonElement>(".play-btn")!;
+    const playIcon = root.querySelector<SVGElement>(".play-icon")!;
+    const scrub = root.querySelector<HTMLElement>(".scrubber-track")!;
+    const fill = root.querySelector<HTMLElement>(".scrubber-fill")!;
+    const thumb = root.querySelector<HTMLElement>(".scrubber-thumb")!;
+    const tCur = root.querySelector<HTMLElement>(".time-cur")!;
+    const tEnd = root.querySelector<HTMLElement>(".time-end")!;
+    const vol = root.querySelector<HTMLElement>(".vol-track")!;
+    const vFill = root.querySelector<HTMLElement>(".vol-fill")!;
+    const vThumb = root.querySelector<HTMLElement>(".vol-thumb")!;
+    const infoBtn = root.querySelector<HTMLButtonElement>(".info-btn");
+    const infoPanel = root.querySelector<HTMLElement>(".info-panel");
 
-  const infoBtn = document.getElementById("infoBtn")!;
-  const infoPanel = document.getElementById("infoPanel") as HTMLElement;
-  let infoOpen = false;
-
-  infoBtn.addEventListener("click", () => {
-    infoOpen = !infoOpen;
-    if (infoOpen) {
-      infoPanel.style.maxHeight = infoPanel.scrollHeight + "px";
-      infoPanel.style.opacity = "1";
-    } else {
-      infoPanel.style.maxHeight = "0";
-      infoPanel.style.opacity = "0";
+    /* RESPONSIVE SCALE */
+    if (!wrapper.hasAttribute("data-fixed-scale")) {
+      const updateScale = () => {
+        const s = Math.max(0.3, Math.min(root.clientWidth / 800, 1));
+        wrapper.style.setProperty("--player-scale", String(s));
+      };
+      updateScale();
+      new ResizeObserver(updateScale).observe(root);
     }
-  });
 
-  /* AUDIO */
+    /* INFO TOGGLE (only when panel exists) */
+    let infoOpen = false;
+    if (infoBtn && infoPanel) {
+      infoBtn.addEventListener("click", () => {
+        infoOpen = !infoOpen;
+        if (infoOpen) {
+          infoPanel.style.maxHeight = infoPanel.scrollHeight + "px";
+          infoPanel.style.opacity = "1";
+        } else {
+          infoPanel.style.maxHeight = "0";
+          infoPanel.style.opacity = "0";
+        }
+      });
+    }
 
-  const audio = document.getElementById("audio") as HTMLAudioElement;
-  audio.volume = 0.8;
+    /* AUDIO */
+    audio.volume = 0.8;
 
-  const tCur = document.getElementById("tCur")!;
-  const tEnd = document.getElementById("tEnd")!;
+    audio.addEventListener("loadedmetadata", () => {
+      tEnd.textContent = formatTime(audio.duration);
+    });
 
-  audio.ondurationchange = () => {
-    tEnd.textContent = formatTime(audio.duration);
-  };
+    audio.addEventListener("durationchange", () => {
+      tEnd.textContent = formatTime(audio.duration);
+    });
 
-  /* PLAY */
-
-  const playBtn = document.getElementById("playBtn")!;
-  const playIcon = document.getElementById("playIcon")!;
-
-  const PLAY = `<path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#ffecdc"/>`;
-  const PAUSE = `
-    <rect x="22" y="18" width="12" height="44" rx="4" fill="#ffecdc"/>
-    <rect x="44" y="18" width="12" height="44" rx="4" fill="#ffecdc"/>
-  `;
-
-  playBtn.onclick = () => {
-    if (audio.paused) {
-      audio.play();
+    /* Cross-player exclusivity: pause others when this one plays */
+    audio.addEventListener("play", () => {
       playIcon.innerHTML = PAUSE;
-    } else {
-      audio.pause();
+      document.querySelectorAll<HTMLAudioElement>(".radio-player-root audio").forEach((other) => {
+        if (other !== audio && !other.paused) other.pause();
+      });
+    });
+
+    audio.addEventListener("pause", () => {
       playIcon.innerHTML = PLAY;
+    });
+
+    audio.addEventListener("ended", () => {
+      playIcon.innerHTML = PLAY;
+      fill.style.width = "0%";
+      thumb.style.left = "0%";
+      tCur.textContent = "00.00";
+    });
+
+    /* PLAY BUTTON */
+    playBtn.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    });
+
+    /* SCRUBBER DRAG */
+    let dragging = false;
+
+    function updateScrub(x: number) {
+      const rect = scrub.getBoundingClientRect();
+      let pct = (x - rect.left) / rect.width;
+      pct = Math.max(0, Math.min(1, pct));
+      if (audio.duration) audio.currentTime = pct * audio.duration;
+      fill.style.width = pct * 100 + "%";
+      thumb.style.left = pct * 100 + "%";
     }
-  };
 
-  /* PROGRESS DRAG */
+    scrub.addEventListener("mousedown", (e) => {
+      dragging = true;
+      updateScrub(e.clientX);
+    });
 
-  const scrub = document.getElementById("scrubber")!;
-  const fill = document.getElementById("sFill")!;
-  const thumb = document.getElementById("sThumb")!;
+    window.addEventListener("mousemove", (e) => {
+      if (dragging) updateScrub(e.clientX);
+    });
 
-  let dragging = false;
+    window.addEventListener("mouseup", () => { dragging = false; });
 
-  function updateScrub(x: number) {
-    const rect = scrub.getBoundingClientRect();
-    let pct = (x - rect.left) / rect.width;
-    pct = Math.max(0, Math.min(1, pct));
-    audio.currentTime = pct * audio.duration;
-    fill.style.width = thumb.style.left = pct * 100 + "%";
-  }
+    audio.addEventListener("timeupdate", () => {
+      if (!audio.duration) return;
+      const pct = audio.currentTime / audio.duration;
+      if (!dragging) {
+        fill.style.width = pct * 100 + "%";
+        thumb.style.left = pct * 100 + "%";
+      }
+      tCur.textContent = formatTime(audio.currentTime);
+    });
 
-  scrub.addEventListener("mousedown", (e) => {
-    dragging = true;
-    updateScrub(e.clientX);
-  });
+    /* VOLUME DRAG */
+    let volDrag = false;
 
-  window.addEventListener("mousemove", (e) => {
-    if (dragging) updateScrub(e.clientX);
-  });
-
-  window.addEventListener("mouseup", () => (dragging = false));
-
-  audio.ontimeupdate = () => {
-    if (!audio.duration) return;
-    const pct = audio.currentTime / audio.duration;
-    if (!dragging) {
-      fill.style.width = thumb.style.left = pct * 100 + "%";
+    function updateVol(x: number) {
+      const rect = vol.getBoundingClientRect();
+      let pct = (x - rect.left) / rect.width;
+      pct = Math.max(0, Math.min(1, pct));
+      audio.volume = pct;
+      vFill.style.width = pct * 100 + "%";
+      vThumb.style.left = pct * 100 + "%";
     }
-    tCur.textContent = formatTime(audio.currentTime);
-  };
 
-  /* VOLUME DRAG */
+    vol.addEventListener("mousedown", (e) => {
+      volDrag = true;
+      updateVol(e.clientX);
+    });
 
-  const vol = document.getElementById("volTrack")!;
-  const vFill = document.getElementById("vFill")!;
-  const vThumb = document.getElementById("vThumb")!;
+    window.addEventListener("mousemove", (e) => {
+      if (volDrag) updateVol(e.clientX);
+    });
 
-  let volDrag = false;
-
-  function updateVol(x: number) {
-    const rect = vol.getBoundingClientRect();
-    let pct = (x - rect.left) / rect.width;
-    pct = Math.max(0, Math.min(1, pct));
-    audio.volume = pct;
-    vFill.style.width = vThumb.style.left = pct * 100 + "%";
-  }
-
-  vol.addEventListener("mousedown", (e) => {
-    volDrag = true;
-    updateVol(e.clientX);
+    window.addEventListener("mouseup", () => { volDrag = false; });
   });
-
-  window.addEventListener("mousemove", (e) => {
-    if (volDrag) updateVol(e.clientX);
-  });
-
-  window.addEventListener("mouseup", () => (volDrag = false));
 </script>
