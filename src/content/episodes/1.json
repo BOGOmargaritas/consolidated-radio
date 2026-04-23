@@ -1,46 +1,62 @@
 {
   "number": 1,
-  "title": "EP01 - THE TELEPHONE",
-  "date": "2026-04-15",
-  "description": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper",
+  "title": "EP01 - Salad Days",
+  "date": "2026-04-22",
+  "description": "It's Spring time! Episode 01 is a collection of music all relating to or invoking the spirit of Sping.",
   "image": "/episode-icons/1.png",
-  "audioSrc": "/music.mp3",
+  "audioSrc": "https://pub-89f0213a3e7c4393b9c22d5542f9a84f.r2.dev/e01%20Salad%20Days.mp3",
   "tracks": [
     {
-      "artist": "BOB DYLAN",
-      "title": "LIKE A ROLLING STONE THAT CALLED ME TOO MANY TIMES TRYING TO ORDER PIZZA"
+      "artist": "EMEFE",
+      "title": "Do Your Dance"
     },
     {
-      "artist": "MATT CHAMPION",
-      "title": "SLUG"
+      "artist": "Art Garfunkle",
+      "title": "Waters of March"
     },
     {
-      "artist": "GORILLAZ",
-      "title": "TICKER TAPE"
-    },
-    {
-      "artist": "QUANTIC",
-      "title": "ATLANTIC OSCILLATIONS"
+      "artist": "Fleetwood Mac",
+      "title": "Dreams"
     },
     {
       "artist": "MGMT",
-      "title": "MOTHER NATURE"
+      "title": "Mother Nature"
     },
     {
-      "artist": "VAMPIRE WEEKEND",
-      "title": "M79"
+      "artist": "Psychic TV",
+      "title": "The Orchids"
     },
     {
-      "artist": "NOBUO UEMATSU",
-      "title": "PRELUDE"
+      "artist": "Budapest Symphonic Orchestra",
+      "title": "The Raindrop Flower"
     },
     {
-      "artist": "KENDRICK LAMAR",
-      "title": "LUST."
+      "artist": "Dark Dazey",
+      "title": "Chameleon"
     },
     {
-      "artist": "GEESE",
-      "title": "COBRA"
+      "artist": "Black Country, New Road",
+      "title": "The Big Spin"
+    },
+    {
+      "artist": "Vampire Weekend",
+      "title": "Flower Moon"
+    },
+    {
+      "artist": "Daryl Hall & John Oates",
+      "title": "Lady Rain"
+    },
+    {
+      "artist": "Kumi Miyasoto",
+      "title": "Rainy Boy"
+    },
+    {
+      "artist": "Idris Muhammad",
+      "title": "Could Heaven Ever Be Like This"
+    },
+    {
+      "artist": "Mat Clark",
+      "title": "The Gardens (LBP1 Mix)"
     }
   ]
 }
