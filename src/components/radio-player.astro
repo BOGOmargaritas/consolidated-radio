@@ -34,7 +34,7 @@ const playerStyle = [
   .filter(Boolean)
   .join("; ");
 
-  console.log(image);
+console.log(image);
 ---
 
 <div class="radio-player-root">
@@ -485,6 +485,7 @@ const playerStyle = [
     .forEach((root) => {
       const wrapper = root.querySelector<HTMLElement>(".player-wrapper")!;
       const audio = root.querySelector<HTMLAudioElement>("audio")!;
+      audio.crossOrigin = "anonymous";
       const playBtn = root.querySelector<HTMLButtonElement>(".play-btn")!;
       const playIcon = root.querySelector<SVGElement>(".play-icon")!;
       const scrub = root.querySelector<HTMLElement>(".scrubber-track")!;
