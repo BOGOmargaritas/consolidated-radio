@@ -15,15 +15,30 @@ const pathname = Astro.url.pathname;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>{title}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/favicon/favicon-96x96.png"
+      sizes="96x96"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
     <link rel="shortcut icon" href="/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
     <link rel="manifest" href="/favicon/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap"
+      rel="stylesheet"
+    />
     <style is:inline>
       @font-face {
         font-family: "OPTIImprovNewWideNine";
@@ -79,7 +94,7 @@ const pathname = Astro.url.pathname;
       .site-nav a {
         text-decoration: none;
         color: #ffecdc;
-        opacity: 0.55;
+        opacity: 1;
         transition: opacity 0.25s ease-in-out;
       }
 
@@ -90,7 +105,6 @@ const pathname = Astro.url.pathname;
       .site-nav a.active {
         opacity: 1;
       }
-
 
       .ffs img {
         position: fixed;
@@ -104,7 +118,9 @@ const pathname = Astro.url.pathname;
         -ms-user-select: none;
         -webkit-user-drag: none;
         user-drag: none;
-        transition: opacity 0.25s ease-in-out, transform 0.5s;
+        transition:
+          opacity 0.25s ease-in-out,
+          transform 0.5s;
       }
 
       .ffs img:hover {
@@ -128,12 +144,15 @@ const pathname = Astro.url.pathname;
     </style>
   </head>
   <body>
-    {!hideVisualizer && <canvas id="visualizer"></canvas>}
+    {!hideVisualizer && <canvas id="visualizer" />}
     <a href="/" class="logo">
       <img id="logoImg" src="/badge-cream-1.png" />
     </a>
     <nav class="site-nav">
-      <a href="/archive/" class={pathname.startsWith("/archive") ? "active" : ""}>ARCHIVE</a>
+      <a
+        href="/archive/"
+        class={pathname.startsWith("/archive") ? "active" : ""}>ARCHIVE</a
+      >
     </nav>
     <div class="ffs">
       <a href="https://fruitfly.supply"><img src="/ffspin.png" /></a>
@@ -145,7 +164,9 @@ const pathname = Astro.url.pathname;
 <script>
   // ── VISUALIZER ──────────────────────────────
 
-  const canvas = document.getElementById("visualizer") as HTMLCanvasElement | null;
+  const canvas = document.getElementById(
+    "visualizer",
+  ) as HTMLCanvasElement | null;
 
   let audioCtx: AudioContext | null = null;
   let analyser: AnalyserNode | null = null;
