@@ -5,6 +5,13 @@ import { getCollection } from "astro:content";
 
 const episodes = (await getCollection("episodes"))
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+const first = episodes[0];
+const firstDate = first
+  ? new Date(first.data.date).toLocaleDateString("en-US", {
+      month: "2-digit", day: "2-digit", year: "numeric",
+    }).replace(/\//g, ".")
+  : "";
 ---
 
 <DefaultLayout title="Archive — Consolidated Radio" hideVisualizer>
@@ -19,7 +26,7 @@ const episodes = (await getCollection("episodes"))
             <>
               {i === 0 && <div class="latest-label">LATEST EPISODE</div>}
               <div
-                class="ep-card-wrapper"
+                class={`ep-card-wrapper${i === 0 ? " active" : ""}`}
                 data-title={ep.data.title}
                 data-date={dateStr}
                 data-desc={ep.data.description}
@@ -39,17 +46,24 @@ const episodes = (await getCollection("episodes"))
       </div>
 
       <div class="ep-detail" id="epDetail">
-        <div class="detail-header" id="detailTitle">SELECT AN EPISODE</div>
+        <div class="detail-header" id="detailTitle">{first ? first.data.title : "SELECT AN EPISODE"}</div>
 
-        <div class="detail-desc-box" id="detailDesc" style="display:none">
+        <div class="detail-desc-box" id="detailDesc" style={first ? "" : "display:none"}>
           <div class="detail-desc-label">DESCRIPTION:</div>
-          <div class="detail-description" id="descText"></div>
-          <div class="detail-date" id="descDate"></div>
+          <div class="detail-description" id="descText">{first ? first.data.description : ""}</div>
+          <div class="detail-date" id="descDate">{firstDate}</div>
         </div>
 
-        <div class="detail-track-box" id="detailTrack" style="display:none">
+        <div class="detail-track-box" id="detailTrack" style={first ? "" : "display:none"}>
           <div class="detail-tracklist-label">TRACKLIST:</div>
-          <div class="detail-tracklist" id="tracklistEl"></div>
+          <div class="detail-tracklist" id="tracklistEl">
+            {first && first.data.tracks.map((t: { artist: string; title: string }) => (
+              <div class="track-row">
+                <div class="dot"></div>
+                <div class="track-name">{t.artist} - {t.title}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -284,7 +298,7 @@ const episodes = (await getCollection("episodes"))
     });
   });
 
-  if (wrappers.length > 0) {
+  if (wrappers.length > 0 && !wrappers[0].classList.contains("active")) {
     selectEpisode(wrappers[0]);
   }
 </script>
