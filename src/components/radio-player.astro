@@ -38,8 +38,12 @@ console.log(image);
 ---
 
 <div class="radio-player-root">
-  <audio src={audioSrc} playsinline webkit-playsinline preload="metadata"
-  ></audio>
+  <audio
+    src={audioSrc}
+    crossorigin="anonymous"
+    playsinline
+    webkit-playsinline
+    preload="metadata"></audio>
   <div
     class="player-wrapper"
     style={playerStyle || undefined}
