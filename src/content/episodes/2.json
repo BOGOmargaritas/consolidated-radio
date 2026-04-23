@@ -1,0 +1,45 @@
+{
+  "number": 1,
+  "title": "EP0e - THE TELEPHONE",
+  "date": "2026-04-15",
+  "description": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper",
+  "audioSrc": "/music.mp3",
+  "tracks": [
+    {
+      "artist": "BOB DYLAN",
+      "title": "LIKE A ROLLING STONE THAT CALLED ME TOO MANY TIMES TRYING TO ORDER PIZZA"
+    },
+    {
+      "artist": "MATT CHAMPION",
+      "title": "SLUG"
+    },
+    {
+      "artist": "GORILLAZ",
+      "title": "TICKER TAPE"
+    },
+    {
+      "artist": "QUANTIC",
+      "title": "ATLANTIC OSCILLATIONS"
+    },
+    {
+      "artist": "MGMT",
+      "title": "MOTHER NATURE"
+    },
+    {
+      "artist": "VAMPIRE WEEKEND",
+      "title": "M79"
+    },
+    {
+      "artist": "NOBUO UEMATSU",
+      "title": "PRELUDE"
+    },
+    {
+      "artist": "KENDRICK LAMAR",
+      "title": "LUST."
+    },
+    {
+      "artist": "GEESE",
+      "title": "COBRA"
+    }
+  ]
+}
