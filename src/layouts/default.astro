@@ -196,7 +196,7 @@ const pathname = Astro.url.pathname;
       vizScale = isMobile
         ? Math.min(1.2, baseScale * 0.8)
         : isTall
-          ? baseScale * 0.82 * 1.0 // scales up on tall screens (no cap)
+          ? baseScale * 0.82 * 1.04 // scales up on tall screens (no cap)
           : Math.min(1.0, baseScale * 0.82);
     }
 
