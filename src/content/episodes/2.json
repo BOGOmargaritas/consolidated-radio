@@ -2,7 +2,7 @@
   "number": 2,
   "title": "EP02 - T-TOPS",
   "date": "2026-05-07",
-  "published": true,
+  "published": false,
   "description": "This one's for the cool moms.",
   "image": "/episode-icons/2.png",
   "audioSrc": "https://bucket.consolidated.radio/e02%20T-Tops.mp3",
