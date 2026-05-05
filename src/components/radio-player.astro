@@ -180,6 +180,12 @@ console.log(image);
     pointer-events: auto;
   }
 
+  @media (max-height: 1200px) {
+    .radio-player-root {
+      width: min(450px, calc(100vw - 24px));
+    }
+  }
+
   @media (max-width: 900px) {
     .radio-player-root {
       width: min(400px, calc(100vw - 52px));
