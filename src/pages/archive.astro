@@ -4,13 +4,20 @@ import RadioPlayer from "../components/radio-player.astro";
 import { getCollection } from "astro:content";
 
 const episodes = (await getCollection("episodes"))
-  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+  .filter((ep) => ep.data.published === true)
+  .sort(
+    (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  );
 
 const first = episodes[0];
 const firstDate = first
-  ? new Date(first.data.date).toLocaleDateString("en-US", {
-      month: "2-digit", day: "2-digit", year: "numeric",
-    }).replace(/\//g, ".")
+  ? new Date(first.data.date)
+      .toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      })
+      .replace(/\//g, ".")
   : "";
 ---
 
@@ -18,52 +25,77 @@ const firstDate = first
   <div class="archive-flow">
     <div class="archive-content">
       <div class="ep-list" id="epList">
-        {episodes.map((ep, i) => {
-          const dateStr = new Date(ep.data.date).toLocaleDateString("en-US", {
-            month: "2-digit", day: "2-digit", year: "numeric",
-          }).replace(/\//g, ".");
-          return (
-            <>
-              {i === 0 && <div class="latest-label">LATEST EPISODE</div>}
-              <div
-                class={`ep-card-wrapper${i === 0 ? " active" : ""}`}
-                data-title={ep.data.title}
-                data-date={dateStr}
-                data-desc={ep.data.description}
-                data-tracks={JSON.stringify(ep.data.tracks)}
-              >
-                <RadioPlayer
-                  title={ep.data.title}
-                  image={ep.data.image}
-                  description={ep.data.description}
-                  audioSrc={ep.data.audioSrc}
-                  tracks={ep.data.tracks}
-                  hideInfoPanel
-                />
-              </div>
-            </>
-          );
-        })}
+        {
+          episodes.map((ep, i) => {
+            const dateStr = new Date(ep.data.date)
+              .toLocaleDateString("en-US", {
+                month: "2-digit",
+                day: "2-digit",
+                year: "numeric",
+              })
+              .replace(/\//g, ".");
+            return (
+              <>
+                {i === 0 && <div class="latest-label">LATEST EPISODE</div>}
+                <div
+                  class={`ep-card-wrapper${i === 0 ? " active" : ""}`}
+                  data-title={ep.data.title}
+                  data-date={dateStr}
+                  data-desc={ep.data.description}
+                  data-tracks={JSON.stringify(ep.data.tracks)}
+                >
+                  <RadioPlayer
+                    title={ep.data.title}
+                    image={ep.data.image}
+                    description={ep.data.description}
+                    audioSrc={ep.data.audioSrc}
+                    tracks={ep.data.tracks}
+                    hideInfoPanel
+                  />
+                </div>
+              </>
+            );
+          })
+        }
       </div>
 
       <div class="ep-detail" id="epDetail">
-        <div class="detail-header" id="detailTitle">{first ? first.data.title : "SELECT AN EPISODE"}</div>
+        <div class="detail-header" id="detailTitle">
+          {first ? first.data.title : "SELECT AN EPISODE"}
+        </div>
 
-        <div class="detail-desc-box" id="detailDesc" style={first ? "" : "display:none"}>
+        <div
+          class="detail-desc-box"
+          id="detailDesc"
+          style={first ? "" : "display:none"}
+        >
           <div class="detail-desc-label">DESCRIPTION:</div>
-          <div class="detail-description" id="descText">{first ? first.data.description : ""}</div>
+          <div class="detail-description" id="descText">
+            {first ? first.data.description : ""}
+          </div>
           <div class="detail-date" id="descDate">{firstDate}</div>
         </div>
 
-        <div class="detail-track-box" id="detailTrack" style={first ? "" : "display:none"}>
+        <div
+          class="detail-track-box"
+          id="detailTrack"
+          style={first ? "" : "display:none"}
+        >
           <div class="detail-tracklist-label">TRACKLIST:</div>
           <div class="detail-tracklist" id="tracklistEl">
-            {first && first.data.tracks.map((t: { artist: string; title: string }) => (
-              <div class="track-row">
-                <div class="dot"></div>
-                <div class="track-name">{t.artist} - {t.title}</div>
-              </div>
-            ))}
+            {
+              first &&
+                first.data.tracks.map(
+                  (t: { artist: string; title: string }) => (
+                    <div class="track-row">
+                      <div class="dot" />
+                      <div class="track-name">
+                        {t.artist} - {t.title}
+                      </div>
+                    </div>
+                  ),
+                )
+            }
           </div>
         </div>
       </div>
@@ -101,9 +133,16 @@ const firstDate = first
     scrollbar-width: thin;
     padding-right: 8px;
   }
-  .ep-list::-webkit-scrollbar { width: 4px; }
-  .ep-list::-webkit-scrollbar-thumb { background: #c23b22; border-radius: 2px; }
-  .ep-list::-webkit-scrollbar-track { background: transparent; }
+  .ep-list::-webkit-scrollbar {
+    width: 4px;
+  }
+  .ep-list::-webkit-scrollbar-thumb {
+    background: #c23b22;
+    border-radius: 2px;
+  }
+  .ep-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
   .latest-label {
     font-family: "OPTIImprovNewWideNine", sans-serif;
@@ -119,7 +158,9 @@ const firstDate = first
   .ep-card-wrapper {
     cursor: pointer;
     border-radius: 20px;
-    transition: transform 0.12s, box-shadow 0.2s;
+    transition:
+      transform 0.12s,
+      box-shadow 0.2s;
   }
   .ep-card-wrapper:hover {
     transform: scale(1.01);
@@ -246,7 +287,9 @@ const firstDate = first
   /* ── RESPONSIVE ────────────────────────────── */
 
   @media (max-width: 900px) {
-    .archive-flow { padding-top: 28vh; }
+    .archive-flow {
+      padding-top: 28vh;
+    }
 
     .archive-content {
       grid-template-columns: 1fr;
@@ -268,16 +311,19 @@ const firstDate = first
 </style>
 
 <script>
-  const wrappers = document.querySelectorAll<HTMLDivElement>(".ep-card-wrapper");
+  const wrappers =
+    document.querySelectorAll<HTMLDivElement>(".ep-card-wrapper");
 
   function selectEpisode(wrapper: HTMLDivElement) {
-    wrappers.forEach(w => w.classList.remove("active"));
+    wrappers.forEach((w) => w.classList.remove("active"));
     wrapper.classList.add("active");
 
     const title = wrapper.dataset.title!;
     const desc = wrapper.dataset.desc!;
     const date = wrapper.dataset.date!;
-    const tracks: { artist: string; title: string }[] = JSON.parse(wrapper.dataset.tracks!);
+    const tracks: { artist: string; title: string }[] = JSON.parse(
+      wrapper.dataset.tracks!,
+    );
 
     document.getElementById("detailTitle")!.textContent = title;
     document.getElementById("descText")!.textContent = desc;
@@ -287,14 +333,18 @@ const firstDate = first
 
     const tl = document.getElementById("tracklistEl")!;
     tl.innerHTML = tracks
-      .map(t => `<div class="track-row"><div class="dot"></div><div class="track-name">${t.artist} - ${t.title}</div></div>`)
+      .map(
+        (t) =>
+          `<div class="track-row"><div class="dot"></div><div class="track-name">${t.artist} - ${t.title}</div></div>`,
+      )
       .join("");
   }
 
-  wrappers.forEach(wrapper => {
+  wrappers.forEach((wrapper) => {
     wrapper.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest(".scrubber-track") || target.closest(".vol-track")) return;
+      if (target.closest(".scrubber-track") || target.closest(".vol-track"))
+        return;
       selectEpisode(wrapper);
     });
   });

@@ -1,0 +1,79 @@
+{
+  "number": 2,
+  "title": "EP02 - T-TOPS",
+  "date": "2026-05-07",
+  "published": false,
+  "description": "This one's for the cool moms.",
+  "image": "/episode-icons/2.png",
+  "audioSrc": "https://bucket.consolidated.radio/e02%20T-Tops.mp3",
+  "tracks": [
+    {
+      "artist": "CHRISTOPHER CROSS",
+      "title": "ALL RIGHT"
+    },
+    {
+      "artist": "THE CURE",
+      "title": "FRIDAY I'M IN LOVE"
+    },
+    {
+      "artist": "THE SMITHS",
+      "title": "OSCILLATE WILDLY"
+    },
+    {
+      "artist": "THE KINKS",
+      "title": "THIS TIME TOMORROW"
+    },
+    {
+      "artist": "ROD STEWART",
+      "title": "YOU WEAR IT WELL"
+    },
+    {
+      "artist": "BILLY JOEL",
+      "title": "SCENES FROM AN ITALIAN RESTAURANT"
+    },
+    {
+      "artist": "BARRY MANILOW",
+      "title": "COPACABANA"
+    },
+    {
+      "artist": "THE BEATLES",
+      "title": "IN MY LIFE"
+    },
+    {
+      "artist": "ROD STEWART",
+      "title": "MAGGIE MAY"
+    },
+    {
+      "artist": "THE KINKS",
+      "title": "DON'T FORGET TO DANCE"
+    },
+    {
+      "artist": "ABBA",
+      "title": "WATERLOO"
+    },
+    {
+      "artist": "BILLY JOEL",
+      "title": "WE DIDN'T START THE FIRE"
+    },
+    {
+      "artist": "ST. PAUL'S CATHEDRAL CHOIR",
+      "title": "EIGHT MELODIES"
+    },
+    {
+      "artist": "ROXY MUSIC",
+      "title": "MOTHER OF PEARL"
+    },
+    {
+      "artist": "GAZEBO",
+      "title": "MASTERPIECE"
+    },
+    {
+      "artist": "MON BIJOU",
+      "title": "JUST A LOVER (GLAMOUR VERSION)"
+    },
+    {
+      "artist": "WHEN IN ROME",
+      "title": "THE PROMISE (COLISEUM CLUB MIX)"
+    }
+  ]
+}

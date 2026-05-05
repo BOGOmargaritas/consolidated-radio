@@ -1,0 +1,99 @@
+{
+  "number": 3,
+  "title": "EP03 - THE BEATS",
+  "date": "2026-05-21",
+  "published": false,
+  "description": "This one's for the cool moms.",
+  "image": "/episode-icons/3.png",
+  "audioSrc": "https://bucket.consolidated.radio/e03%20The%20Beats.mp3",
+  "tracks": [
+    {
+      "artist": "MADLIB",
+      "title": "THE PAYBACK (GOTTA)"
+    },
+    {
+      "artist": "KNXWLEDGE",
+      "title": "TKEKAROFIT"
+    },
+    {
+      "artist": "KARRIEM RIGGINS",
+      "title": "K. RIFFINS"
+    },
+    {
+      "artist": "DIBIA$E",
+      "title": "FUNKEDUP"
+    },
+    {
+      "artist": "PAUL WHITE",
+      "title": "BOM BOM"
+    },
+    {
+      "artist": "MADLIB",
+      "title": "RAW GROUND WIRE"
+    },
+    {
+      "artist": "KARRIEM RIGGINS",
+      "title": "SUMMER MADNESS S.A"
+    },
+    {
+      "artist": "FLYING LOTUS",
+      "title": "BAD ACTORS"
+    },
+    {
+      "artist": "PAUL WHITE",
+      "title": "PRIDE"
+    },
+    {
+      "artist": "NUJABES",
+      "title": "STEADFAST"
+    },
+    {
+      "artist": "AMON TOBIN",
+      "title": "THE METHOD"
+    },
+    {
+      "artist": "TEEBS",
+      "title": "LAKESHORE AVE."
+    },
+    {
+      "artist": "NUJABES",
+      "title": "KUMOMI"
+    },
+    {
+      "artist": "KARRIEM RIGGINS",
+      "title": "BRING THAT BEAT BACK"
+    },
+    {
+      "artist": "KNXWLEDGE",
+      "title": "MYSUNSHINE"
+    },
+    {
+      "artist": "LORN",
+      "title": "THE GUN"
+    },
+    {
+      "artist": "LIL UGLY MANE",
+      "title": "FLUID"
+    },
+    {
+      "artist": "CLAMS CASINO",
+      "title": "NATURAL"
+    },
+    {
+      "artist": "KNXWLEDGE",
+      "title": "SADNISS[VMPD]"
+    },
+    {
+      "artist": "SAMIYAM",
+      "title": "NO DINNER"
+    },
+    {
+      "artist": "NUJABES",
+      "title": "MOON STRUT (INTRO)"
+    },
+    {
+      "artist": "MADLIB",
+      "title": "ROAD OF THE LONELY ONES"
+    }
+  ]
+}
