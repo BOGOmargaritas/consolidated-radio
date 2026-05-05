@@ -186,11 +186,18 @@ const pathname = Astro.url.pathname;
       h = canvas!.height = window.innerHeight;
       cx = w / 2;
       cy = h * 0.54;
+
       const baseScale = h / VIZ_REF_PX;
       const isMobile = w < 900;
+      const isTall = h > 1200;
+
+      cy = isTall ? h * 0.563 : h * 0.54;
+
       vizScale = isMobile
         ? Math.min(1.2, baseScale * 0.8)
-        : Math.min(1.0, baseScale * 0.82);
+        : isTall
+          ? baseScale * 0.82 * 1.0 // scales up on tall screens (no cap)
+          : Math.min(1.0, baseScale * 0.82);
     }
 
     resize();
@@ -312,6 +319,7 @@ const pathname = Astro.url.pathname;
     let time = 0;
 
     function draw() {
+      ctx.clearRect(0, 0, w, h);
       requestAnimationFrame(draw);
 
       const bass =
@@ -330,9 +338,6 @@ const pathname = Astro.url.pathname;
           : 0;
 
       ease = lerp(ease, playing ? 1 : 0, easeSpeed);
-
-      ctx.fillStyle = "rgba(0,0,0,0.15)";
-      ctx.fillRect(0, 0, w, h);
 
       if (playing) time += 0.01;
 
@@ -368,8 +373,30 @@ const pathname = Astro.url.pathname;
         }
 
         ctx.closePath();
+        // glow passes 1, 2, 3, 4 -- opacity stacks
+        ctx.shadowBlur = 12 * s;
+        ctx.shadowColor = "#ffecdc";
+        ctx.strokeStyle = "#ffecdc";
+        ctx.lineWidth = (3 + bass * 1 * ease) * s;
+        ctx.stroke();
+
         ctx.shadowBlur = 8 * s;
         ctx.shadowColor = "#ffecdc";
+        ctx.stroke();
+
+        ctx.shadowBlur = 8 * s;
+        ctx.shadowColor = "#ffecdc";
+        ctx.stroke();
+
+        ctx.shadowBlur = 8 * s;
+        ctx.shadowColor = "#ffecdc";
+        ctx.stroke();
+
+        // subtle inner line to keep it crisp
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "#ffecdc";
+        ctx.lineWidth = (1.5 + bass * 0.5 * ease) * s;
+        ctx.stroke();
         ctx.strokeStyle = "#ffecdc";
         ctx.lineWidth = (3 + bass * 1 * ease) * s;
         ctx.stroke();
