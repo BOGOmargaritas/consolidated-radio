@@ -1,0 +1,99 @@
+{
+  "number": 4,
+  "title": "EP04 - ROSE TINTED",
+  "date": "2026-06-04",
+  "published": true,
+  "description": "This one's for the cool moms.",
+  "image": "/episode-icons/3.png",
+  "audioSrc": "https://bucket.consolidated.radio/e04%20Rose%20Tinted.mp3",
+  "tracks": [
+    {
+      "artist": "IN LOVE WITH A GHOST",
+      "title": "I'M SORRY FOR NOT ANSWERING THE PHONE"
+    },
+    {
+      "artist": "AL STEWART",
+      "title": "TIME PASSAGES"
+    },
+    {
+      "artist": "KIM CARNES",
+      "title": "BETTE DAVIS EYES"
+    },
+    {
+      "artist": "LINDSEY BUCKINGHAM",
+      "title": "TROUBLE"
+    },
+    {
+      "artist": "TOMMY JAMES & THE SHONDELLS",
+      "title": "I THINK WE'RE ALONE NOW"
+    },
+    {
+      "artist": "TWEEDY",
+      "title": "LET'S FIND EACH OTHER TONIGHT"
+    },
+    {
+      "artist": "STRAWBERRY SWITCHBLADE",
+      "title": "SINCE YESTERDAY"
+    },
+    {
+      "artist": "THE KINKS",
+      "title": "MOMENTS"
+    },
+    {
+      "artist": "BLUE OYSTER CULT",
+      "title": "IN THEE"
+    },
+    {
+      "artist": "THE KILLERS",
+      "title": "THE WAY IT WAS"
+    },
+    {
+      "artist": "STEELY DAN",
+      "title": "PEG"
+    },
+    {
+      "artist": "STARBUCK",
+      "title": "MOONLIGHT FEELS RIGHT"
+    },
+    {
+      "artist": "KING HARVEST",
+      "title": "DANCING IN THE MOONLIGHT"
+    },
+    {
+      "artist": "SAM EVIAN",
+      "title": "SOLD ME A DREAM (TERRY TRACKSUIT EDIT)"
+    },
+    {
+      "artist": "ZACK VILLERE",
+      "title": "DUBBLE BUBBLE"
+    },
+    {
+      "artist": "TEEZO TOUCHDOWN",
+      "title": "STRONG FRIEND"
+    },
+    {
+      "artist": "GINGER ROOT",
+      "title": "LORETTA"
+    },
+    {
+      "artist": "BUCKS FIZZ",
+      "title": "THE LAND OF MAKE BELIEVE"
+    },
+    {
+      "artist": "THE BEACH BOYS",
+      "title": "GOD ONLY KNOWS"
+    },
+    {
+      "artist": "AMERICA",
+      "title": "SISTER GOLDEN HAIR"
+    },
+    {
+      "artist": "LITTLE RIVER BAND",
+      "title": "REMINISCING"
+    },
+    {
+      "artist": "NEIL YOUNG",
+      "title": "HARVEST MOON"
+    }
+  ]
+}
