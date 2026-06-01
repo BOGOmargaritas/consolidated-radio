@@ -2,21 +2,20 @@
 import { getCollection } from "astro:content";
 import RadioPage from "../../components/radio-page.astro";
 
-export function getStaticPaths() {
-  return [
-    { params: { number: decodeURI("%5Bnumber%5D") } }, // decodes to "[page]"
-  ];
+export async function getStaticPaths() {
+  const episodes = await getCollection("episodes");
+
+  return episodes.map((episode) => ({
+    params: {
+      number: String(episode.data.number),
+    },
+    props: {
+      episode,
+    },
+  }));
 }
 
-const { number } = Astro.params;
-
-const episode = (await getCollection("episodes")).find(
-  (episode) => episode.data.number === parseInt(number),
-);
-
-if (!episode) {
-  return Astro.redirect("/");
-}
+const { episode } = Astro.props;
 ---
 
 <RadioPage {...episode.data} />
