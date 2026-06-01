@@ -4,14 +4,14 @@ import RadioPage from "../../components/radio-page.astro";
 
 export function getStaticPaths() {
   return [
-    { params: { id: decodeURI("%5Bid%5D") } }, // decodes to "[page]"
+    { params: { number: decodeURI("%5Bnumber%5D") } }, // decodes to "[page]"
   ];
 }
 
-const { id } = Astro.params;
+const { number } = Astro.params;
 
 const episode = (await getCollection("episodes")).find(
-  (episode) => episode.data.number === parseInt(id),
+  (episode) => episode.data.number === parseInt(number),
 );
 
 if (!episode) {
