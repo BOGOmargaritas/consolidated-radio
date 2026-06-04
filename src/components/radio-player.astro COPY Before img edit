@@ -497,13 +497,6 @@ console.log(image);
       const wrapper = root.querySelector<HTMLElement>(".player-wrapper")!;
       const audio = root.querySelector<HTMLAudioElement>("audio")!;
       audio.crossOrigin = "anonymous";
-
-      const title =
-        root.querySelector(".ep-title")?.textContent?.trim() ??
-        "Consolidated Radio";
-
-      const artwork = "https://consolidated.radio/episodeimage.png";
-
       const playBtn = root.querySelector<HTMLButtonElement>(".play-btn")!;
       const playIcon = root.querySelector<SVGElement>(".play-icon")!;
       const scrub = root.querySelector<HTMLElement>(".scrubber-track")!;
@@ -556,31 +549,10 @@ console.log(image);
       /* Cross-player exclusivity: pause others when this one plays */
       audio.addEventListener("play", () => {
         playIcon.innerHTML = PAUSE;
-
-        if ("mediaSession" in navigator) {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title,
-            artist: "Consolidated Radio",
-            album: "Consolidated Radio",
-            artwork: [
-              {
-                src: artwork,
-                sizes: "1200x1200",
-                type: "image/png",
-              },
-            ],
-          });
-
-          navigator.mediaSession.setActionHandler("play", () => audio.play());
-          navigator.mediaSession.setActionHandler("pause", () => audio.pause());
-        }
-
         document
           .querySelectorAll<HTMLAudioElement>(".radio-player-root audio")
           .forEach((other) => {
-            if (other !== audio && !other.paused) {
-              other.pause();
-            }
+            if (other !== audio && !other.paused) other.pause();
           });
       });
 
