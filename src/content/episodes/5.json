@@ -1,0 +1,71 @@
+{
+  "number": 5,
+  "title": "EP05 | CORINTHIAN LEATHER",
+  "date": "2026-06-18",
+  "published": true,
+  "description": "A Father's Day episode full of classic rock. Songs that my dad would listen to on the radio and songs that I can remember hearing while driving in his car.",
+  "image": "/episode-icons/5.png",
+  "audioSrc": "https://bucket.consolidated.radio/e05%20Corinthian%20Leather.mp3",
+  "tracks": [
+    {
+      "artist": "THE ROLLING STONES",
+      "title": "SYMPATHY FOR THE DEVIL"
+    },
+    {
+      "artist": "DEEP PURPLE",
+      "title": "SMOKE ON THE WATER"
+    },
+    {
+      "artist": "LED ZEPPELIN",
+      "title": "STAIRWAY TO HEAVEN"
+    },
+    {
+      "artist": "BOSTON",
+      "title": "MORE THAN A FEELING"
+    },
+    {
+      "artist": "THE DOOBIE BROTHERS",
+      "title": "LISTEN TO THE MUSIC"
+    },
+    {
+      "artist": "THE EAGLES",
+      "title": "HOTEL CALIFORNIA"
+    },
+    {
+      "artist": "FOREIGNER",
+      "title": "COLD AS ICE"
+    },
+    {
+      "artist": "STYX",
+      "title": "RENEGADE"
+    },
+    {
+      "artist": "STYX",
+      "title": "PIECES OF EIGHT"
+    },
+    {
+      "artist": "PINK FLOYD",
+      "title": "ANOTHER BRICK IN THE WALL PT. 1"
+    },
+    {
+      "artist": "PINK FLOYD",
+      "title": "THE HAPPIEST DAYS OF OUR LIVES"
+    },
+    {
+      "artist": "PINK FLOYD",
+      "title": "ANOTHER BRICK IN THE WALL PT. 2"
+    },
+    {
+      "artist": "AC/DC",
+      "title": "BACK IN BLACK"
+    },
+    {
+      "artist": "QUEEN",
+      "title": "ANOTHER ONE BITES THE DUST"
+    },
+    {
+      "artist": "VAN HALEN",
+      "title": "JUMP"
+    }
+  ]
+}
