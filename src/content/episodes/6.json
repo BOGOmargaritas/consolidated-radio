@@ -1,0 +1,67 @@
+{
+  "number": 6,
+  "title": "EP06 | VICE",
+  "date": "2026-07-1",
+  "published": true,
+  "description": "This episode is all about bad habits and immoral behavior. ",
+  "image": "/episode-icons/6.png",
+  "audioSrc": "https://bucket.consolidated.radio/e06%20Vice.mp3",
+  "tracks": [
+    {
+      "artist": "QUANTUM JUMP",
+      "title": "NEIGHBORS"
+    },
+    {
+      "artist": "KENNY ROGERS",
+      "title": "JUST DROPPED IN"
+    },
+    {
+      "artist": "GORILLAZ",
+      "title": "TAXI BACK TO 80'S REYKJAVIK"
+    },
+    {
+      "artist": "MADVILLAIN",
+      "title": "MEATGRINDER"
+    },
+    {
+      "artist": "PRINCE",
+      "title": "CONTROVERSY"
+    },
+    {
+      "artist": "SOPHIE ELLIS-BEXTOR",
+      "title": "MURDER ON THE DANCE FLOOR (PNAU REMIX)"
+    },
+    {
+      "artist": "ADOLF STERN",
+      "title": "MORE... I LIKE IT"
+    },
+    {
+      "artist": "TAME IMPALA",
+      "title": "POWERLINES"
+    },
+    {
+      "artist": "DALBELLO",
+      "title": "GUILTY BY ASSOCIATION"
+    },
+    {
+      "artist": "NEIL YOUNG",
+      "title": "DOWN BY THE RIVER"
+    },
+    {
+      "artist": "BRUCE SPRINGSTEEN",
+      "title": "STATE TROOPER"
+    },
+    {
+      "artist": "MUSTARD SERVICE",
+      "title": "HIGH ROLLER"
+    },
+    {
+      "artist": "UNKNOWN MORTAL ORCHESTRA",
+      "title": "NECESSARY EVIL"
+    },
+    {
+      "artist": "GORILLAZ",
+      "title": "FIRE COMING OUT OF THE MONKEY'S HEAD"
+    }
+  ]
+}
