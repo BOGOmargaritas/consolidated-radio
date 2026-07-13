@@ -551,30 +551,6 @@ console.log(image);
     return `${String(m).padStart(2, "0")}.${String(sec).padStart(2, "0")}`;
   }
 
-  /**
-   * Push the current playback position to the OS media controls (iOS lock
-   * screen / Control Center) so the seek-forward/back buttons there compute
-   * their jump from the real current time rather than a stale one. Without
-   * calling this repeatedly (not just once at load), iOS's internal clock
-   * drifts from the audio element once the tab is backgrounded, which is
-   * what produces the wrong seek-forward amount.
-   */
-  function syncPositionState(audio: HTMLAudioElement) {
-    if (!("mediaSession" in navigator)) return;
-    if (!audio.duration || isNaN(audio.duration)) return;
-    try {
-      navigator.mediaSession.setPositionState({
-        duration: audio.duration,
-        playbackRate: audio.playbackRate || 1,
-        position: Math.min(audio.currentTime, audio.duration),
-      });
-    } catch {
-      // setPositionState can throw if called with invalid/mismatched values
-      // mid-transition (e.g. during a seek); safe to ignore and retry on the
-      // next timeupdate tick.
-    }
-  }
-
   document
     .querySelectorAll<HTMLElement>(".radio-player-root")
     .forEach((root) => {
@@ -595,18 +571,15 @@ console.log(image);
 
         navigator.mediaSession.setActionHandler("seekforward", (details) => {
           audio.currentTime += details.seekOffset || 30;
-          syncPositionState(audio);
         });
 
         navigator.mediaSession.setActionHandler("seekbackward", (details) => {
           audio.currentTime -= details.seekOffset || 10;
-          syncPositionState(audio);
         });
 
         navigator.mediaSession.setActionHandler("seekto", (details) => {
           if (details.seekTime != null) {
             audio.currentTime = details.seekTime;
-            syncPositionState(audio);
           }
         });
       }
@@ -665,12 +638,10 @@ console.log(image);
 
       audio.addEventListener("loadedmetadata", () => {
         tEnd.textContent = formatTime(audio.duration);
-        syncPositionState(audio);
       });
 
       audio.addEventListener("durationchange", () => {
         tEnd.textContent = formatTime(audio.duration);
-        syncPositionState(audio);
       });
 
       // Metadata may already be loaded before this script ran (fast CDN /
@@ -678,7 +649,6 @@ console.log(image);
       // current state directly to cover that race.
       if (audio.readyState >= 1 /* HAVE_METADATA */ && !isNaN(audio.duration)) {
         tEnd.textContent = formatTime(audio.duration);
-        syncPositionState(audio);
       }
 
       /* Cross-player exclusivity: pause others when this one plays */
@@ -707,8 +677,6 @@ console.log(image);
           navigator.mediaSession.setActionHandler("seekforward", () =>
             seekBy(30),
           );
-
-          syncPositionState(audio);
         }
 
         document
@@ -722,7 +690,6 @@ console.log(image);
 
       audio.addEventListener("pause", () => {
         playIcon.innerHTML = PLAY;
-        syncPositionState(audio);
       });
 
       audio.addEventListener("ended", () => {
@@ -749,7 +716,6 @@ console.log(image);
           0,
           Math.min(duration, audio.currentTime + seconds),
         );
-        syncPositionState(audio);
       }
 
       skipBackBtn.addEventListener("click", () => seekBy(-10));
@@ -777,7 +743,6 @@ console.log(image);
       });
 
       window.addEventListener("mouseup", () => {
-        if (dragging) syncPositionState(audio);
         dragging = false;
       });
 
@@ -789,10 +754,6 @@ console.log(image);
           thumb.style.left = pct * 100 + "%";
         }
         tCur.textContent = formatTime(audio.currentTime);
-
-        // Keep the lock-screen position state fresh throughout playback,
-        // including while backgrounded, so seek offsets stay accurate.
-        syncPositionState(audio);
       });
 
       /* VOLUME DRAG */
