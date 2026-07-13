@@ -4,9 +4,10 @@ interface Props {
   hideVisualizer?: boolean;
 }
 
+import Analytics from "@vercel/analytics/astro";
+
 const { title = "Consolidated Radio", hideVisualizer = false } = Astro.props;
 const pathname = Astro.url.pathname;
-import Analytics from "@vercel/analytics/astro";
 ---
 
 <!doctype html>
