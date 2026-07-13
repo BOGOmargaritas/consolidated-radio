@@ -783,60 +783,101 @@ console.log(image);
     });
 </script>
 
-<script>
-  // Runs immediately on the client side once the DOM is ready
+<!-- 
+  Your existing HTML player code stays exactly as it is. 
+  Ensure your main Play/Pause button has the class "play-btn" 
+  so the script below can hook into it.
+-->
+
+<script is:inline>
+  // 'is:inline' forces Astro to load this directly in the DOM exactly where it is placed.
   document.addEventListener("DOMContentLoaded", () => {
-    const audio = document.querySelector(
-      ".radio-player-root audio",
-    ) as HTMLAudioElement;
+    const audio = document.querySelector(".radio-player-root audio");
+    const playBtn = document.querySelector(".play-btn");
     const skipFwdBtn = document.querySelector(".skip-fwd-btn");
     const skipBackBtn = document.querySelector(".skip-back-btn");
+    const skipTime = 30;
 
     if (!audio) return;
 
-    const skipTime = 30;
-
-    // Helper function to handle seek logic safely
-    function seek(amount: number) {
+    // Helper: Safely changes time and forces iOS to repaint the lock screen timeline
+    function seek(amount) {
       if (!audio.duration) return;
       let newTime = audio.currentTime + amount;
       if (newTime < 0) newTime = 0;
       if (newTime > audio.duration) newTime = audio.duration;
       audio.currentTime = newTime;
 
-      // Force iOS to sync the visual scrubber position immediately
-      if ("mediaSession" in navigator) {
+      updatePositionState();
+    }
+
+    function updatePositionState() {
+      if ("mediaSession" in navigator && audio.duration) {
         navigator.mediaSession.setPositionState({
-          duration: audio.duration || 0,
+          duration: audio.duration,
           playbackRate: audio.playbackRate || 1,
-          position: audio.currentTime || 0,
+          position: audio.currentTime,
         });
       }
     }
 
-    // 1. Hook up iOS System Controls (Lock screen / Control Center)
+    // iOS Requirement: Lock screen actions will FAIL if 'play' and 'pause' handlers aren't explicitly registered.
     if ("mediaSession" in navigator) {
+      // 1. Core State Handlers
+      navigator.mediaSession.setActionHandler("play", () => {
+        audio.play();
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        audio.pause();
+      });
+
+      // 2. 30-Second Skip Handlers
       navigator.mediaSession.setActionHandler("seekbackward", (details) => {
-        // iOS sometimes sends a specific offset, fallback to default 30s
         const offset = details.seekOffset || skipTime;
         seek(-offset);
       });
-
       navigator.mediaSession.setActionHandler("seekforward", (details) => {
         const offset = details.seekOffset || skipTime;
         seek(offset);
       });
 
-      // Keep playback state synced so iOS doesn't lose track of the audio
+      // Sync Native Audio Events to the iOS MediaSession
       audio.addEventListener("play", () => {
         navigator.mediaSession.playbackState = "playing";
+
+        // iOS requires metadata presence to paint lock screen media titles
+        if (!navigator.mediaSession.metadata) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title:
+              document.querySelector(".ep-title")?.textContent || "Web Audio",
+            artist: "Podcast Player",
+          });
+        }
       });
+
       audio.addEventListener("pause", () => {
         navigator.mediaSession.playbackState = "paused";
       });
+
+      audio.addEventListener("timeupdate", () => {
+        // Debounce or update periodically to match iOS scrubber movement
+        if (Math.floor(audio.currentTime) % 5 === 0) {
+          updatePositionState();
+        }
+      });
     }
 
-    // 2. Tie it to your existing layout HTML buttons (Optional but recommended)
+    // UI Click Event Listeners
+    if (playBtn) {
+      playBtn.addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play();
+        } else {
+          audio.pause();
+        }
+      });
+    }
+
     if (skipFwdBtn) {
       skipFwdBtn.addEventListener("click", () => seek(skipTime));
     }
