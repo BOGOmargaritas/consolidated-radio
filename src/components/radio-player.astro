@@ -783,15 +783,9 @@ console.log(image);
     });
 </script>
 
-<!-- 
-  Your existing HTML player code stays exactly as it is. 
-  Ensure your main Play/Pause button has the class "play-btn" 
-  so the script below can hook into it.
--->
-
 <script is:inline>
-  // 'is:inline' forces Astro to load this directly in the DOM exactly where it is placed.
   document.addEventListener("DOMContentLoaded", () => {
+    // 1. Grab elements exactly as they are defined in your HTML wrapper
     const audio = document.querySelector(".radio-player-root audio");
     const playBtn = document.querySelector(".play-btn");
     const skipFwdBtn = document.querySelector(".skip-fwd-btn");
@@ -800,19 +794,15 @@ console.log(image);
 
     if (!audio) return;
 
-    // Helper: Safely changes time and forces iOS to repaint the lock screen timeline
-    function seek(amount) {
-      if (!audio.duration) return;
-      let newTime = audio.currentTime + amount;
-      if (newTime < 0) newTime = 0;
-      if (newTime > audio.duration) newTime = audio.duration;
-      audio.currentTime = newTime;
+    // Helper: Centralized seek execution to synchronize Safari's lock screen UI
+    function executeSeek(targetTime) {
+      if (isNaN(audio.duration)) return;
 
-      updatePositionState();
-    }
+      // Bound the movement safely between 0 and track limit
+      audio.currentTime = Math.max(0, Math.min(targetTime, audio.duration));
 
-    function updatePositionState() {
-      if ("mediaSession" in navigator && audio.duration) {
+      // Force immediate UI repaint on iOS Lock Screen
+      if ("mediaSession" in navigator) {
         navigator.mediaSession.setPositionState({
           duration: audio.duration,
           playbackRate: audio.playbackRate || 1,
@@ -821,53 +811,66 @@ console.log(image);
       }
     }
 
-    // iOS Requirement: Lock screen actions will FAIL if 'play' and 'pause' handlers aren't explicitly registered.
-    if ("mediaSession" in navigator) {
-      // 1. Core State Handlers
-      navigator.mediaSession.setActionHandler("play", () => {
-        audio.play();
-      });
-      navigator.mediaSession.setActionHandler("pause", () => {
-        audio.pause();
+    // 2. Initialize iOS Media Session parameters safely
+    function initMediaSession() {
+      if (!("mediaSession" in navigator)) return;
+
+      // iOS Requirement: Metadata is mandatory for custom seek buttons to show up
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title:
+          document.querySelector(".ep-title")?.textContent?.trim() ||
+          "Audio Track",
+        artist: "Podcast Player",
       });
 
-      // 2. 30-Second Skip Handlers
+      // Core State Hooks (iOS ignores skip commands if these are absent)
+      navigator.mediaSession.setActionHandler("play", () => audio.play());
+      navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+
+      // Custom Seek Hooks
       navigator.mediaSession.setActionHandler("seekbackward", (details) => {
         const offset = details.seekOffset || skipTime;
-        seek(-offset);
+        executeSeek(audio.currentTime - offset);
       });
+
       navigator.mediaSession.setActionHandler("seekforward", (details) => {
         const offset = details.seekOffset || skipTime;
-        seek(offset);
+        executeSeek(audio.currentTime + offset);
       });
 
-      // Sync Native Audio Events to the iOS MediaSession
-      audio.addEventListener("play", () => {
-        navigator.mediaSession.playbackState = "playing";
-
-        // iOS requires metadata presence to paint lock screen media titles
-        if (!navigator.mediaSession.metadata) {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title:
-              document.querySelector(".ep-title")?.textContent || "Web Audio",
-            artist: "Podcast Player",
-          });
-        }
-      });
-
-      audio.addEventListener("pause", () => {
-        navigator.mediaSession.playbackState = "paused";
-      });
-
-      audio.addEventListener("timeupdate", () => {
-        // Debounce or update periodically to match iOS scrubber movement
-        if (Math.floor(audio.currentTime) % 5 === 0) {
-          updatePositionState();
+      // Critical Fix: Intercept direct lock screen scrub bar drag interactions
+      navigator.mediaSession.setActionHandler("seekto", (details) => {
+        if (details.fastSeek && "fastSeek" in audio) {
+          audio.fastSeek(details.seekTime);
+        } else {
+          executeSeek(details.seekTime);
         }
       });
     }
 
-    // UI Click Event Listeners
+    // 3. Audio State Tracking
+    audio.addEventListener("play", () => {
+      navigator.mediaSession.playbackState = "playing";
+      // Initialize or refresh session state on user action
+      initMediaSession();
+    });
+
+    audio.addEventListener("pause", () => {
+      navigator.mediaSession.playbackState = "paused";
+    });
+
+    // Handle initial asset handshake with iOS media server
+    audio.addEventListener("loadedmetadata", () => {
+      if ("mediaSession" in navigator && !isNaN(audio.duration)) {
+        navigator.mediaSession.setPositionState({
+          duration: audio.duration,
+          playbackRate: audio.playbackRate || 1,
+          position: audio.currentTime,
+        });
+      }
+    });
+
+    // 4. Physical HTML Button Click Binds
     if (playBtn) {
       playBtn.addEventListener("click", () => {
         if (audio.paused) {
@@ -879,10 +882,14 @@ console.log(image);
     }
 
     if (skipFwdBtn) {
-      skipFwdBtn.addEventListener("click", () => seek(skipTime));
+      skipFwdBtn.addEventListener("click", () =>
+        executeSeek(audio.currentTime + skipTime),
+      );
     }
     if (skipBackBtn) {
-      skipBackBtn.addEventListener("click", () => seek(-skipTime));
+      skipBackBtn.addEventListener("click", () =>
+        executeSeek(audio.currentTime - skipTime),
+      );
     }
   });
 </script>
