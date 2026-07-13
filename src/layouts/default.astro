@@ -5,6 +5,7 @@ interface Props {
 }
 
 import Analytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
 
 const { title = "Consolidated Radio", hideVisualizer = false } = Astro.props;
 const pathname = Astro.url.pathname;
@@ -447,3 +448,6 @@ const pathname = Astro.url.pathname;
     logoImg.src = logos[0];
   }
 </script>
+
+<Analytics />
+<SpeedInsights />
