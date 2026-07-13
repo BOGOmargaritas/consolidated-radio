@@ -782,3 +782,66 @@ console.log(image);
       });
     });
 </script>
+
+<script>
+  // Runs immediately on the client side once the DOM is ready
+  document.addEventListener("DOMContentLoaded", () => {
+    const audio = document.querySelector(
+      ".radio-player-root audio",
+    ) as HTMLAudioElement;
+    const skipFwdBtn = document.querySelector(".skip-fwd-btn");
+    const skipBackBtn = document.querySelector(".skip-back-btn");
+
+    if (!audio) return;
+
+    const skipTime = 30;
+
+    // Helper function to handle seek logic safely
+    function seek(amount: number) {
+      if (!audio.duration) return;
+      let newTime = audio.currentTime + amount;
+      if (newTime < 0) newTime = 0;
+      if (newTime > audio.duration) newTime = audio.duration;
+      audio.currentTime = newTime;
+
+      // Force iOS to sync the visual scrubber position immediately
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.setPositionState({
+          duration: audio.duration || 0,
+          playbackRate: audio.playbackRate || 1,
+          position: audio.currentTime || 0,
+        });
+      }
+    }
+
+    // 1. Hook up iOS System Controls (Lock screen / Control Center)
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+        // iOS sometimes sends a specific offset, fallback to default 30s
+        const offset = details.seekOffset || skipTime;
+        seek(-offset);
+      });
+
+      navigator.mediaSession.setActionHandler("seekforward", (details) => {
+        const offset = details.seekOffset || skipTime;
+        seek(offset);
+      });
+
+      // Keep playback state synced so iOS doesn't lose track of the audio
+      audio.addEventListener("play", () => {
+        navigator.mediaSession.playbackState = "playing";
+      });
+      audio.addEventListener("pause", () => {
+        navigator.mediaSession.playbackState = "paused";
+      });
+    }
+
+    // 2. Tie it to your existing layout HTML buttons (Optional but recommended)
+    if (skipFwdBtn) {
+      skipFwdBtn.addEventListener("click", () => seek(skipTime));
+    }
+    if (skipBackBtn) {
+      skipBackBtn.addEventListener("click", () => seek(-skipTime));
+    }
+  });
+</script>
