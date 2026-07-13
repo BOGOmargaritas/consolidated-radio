@@ -5,9 +5,5 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
-  })
+  adapter: vercel()
 });
