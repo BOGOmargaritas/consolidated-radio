@@ -556,6 +556,7 @@ console.log(image);
     .forEach((root) => {
       const wrapper = root.querySelector<HTMLElement>(".player-wrapper")!;
       const audio = root.querySelector<HTMLAudioElement>("audio")!;
+      const skipTime = 30; // Time in seconds
       audio.crossOrigin = "anonymous";
 
       /** Attempt to fix lockscreen seek showing wrong number */
@@ -568,11 +569,11 @@ console.log(image);
           audio.pause();
         });
 
-        navigator.mediaSession.setActionHandler("seekforward", () => {
+        navigator.mediaSession.setActionHandler("seekforward", (details) => {
           audio.currentTime += details.seekOffset || 30;
         });
 
-        navigator.mediaSession.setActionHandler("seekbackward", () => {
+        navigator.mediaSession.setActionHandler("seekbackward", (details) => {
           audio.currentTime -= details.seekOffset || 10;
         });
 
