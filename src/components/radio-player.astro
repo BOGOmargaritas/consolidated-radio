@@ -109,7 +109,10 @@ console.log(image);
                 INFO
               </button>
 
-              <button class="skip-btn skip-back-btn" aria-label="Go back 10 seconds">
+              <button
+                class="skip-btn skip-back-btn"
+                aria-label="Go back 10 seconds"
+              >
                 <svg class="skip-btn-svg" viewBox="0 0 1100 600">
                   <g fill="#ffecdc">
                     <path
@@ -554,6 +557,32 @@ console.log(image);
       const wrapper = root.querySelector<HTMLElement>(".player-wrapper")!;
       const audio = root.querySelector<HTMLAudioElement>("audio")!;
       audio.crossOrigin = "anonymous";
+
+      /** Attempt to fix lockscreen seek showing wrong number */
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.setActionHandler("play", () => {
+          audio.play();
+        });
+
+        navigator.mediaSession.setActionHandler("pause", () => {
+          audio.pause();
+        });
+
+        navigator.mediaSession.setActionHandler("seekforward", () => {
+          audio.currentTime += details.seekOffset || 30;
+        });
+
+        navigator.mediaSession.setActionHandler("seekbackward", () => {
+          audio.currentTime -= details.seekOffset || 10;
+        });
+
+        navigator.mediaSession.setActionHandler("seekto", (details) => {
+          if (details.seekTime != null) {
+            audio.currentTime = details.seekTime;
+          }
+        });
+      }
+      /** End attempt*/
 
       const title =
         root.querySelector(".ep-title")?.textContent?.trim() ??
