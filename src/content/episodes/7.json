@@ -1,0 +1,79 @@
+{
+  "number": 7,
+  "title": "EP07 | CICADAS",
+  "date": "2026-07-20",
+  "published": true,
+  "description": "Do you like bugs? This one is dedicated to those summer days when the heat is too hot and the cicada's song is too loud.",
+  "image": "/episode-icons/7.png",
+  "audioSrc": "https://bucket.consolidated.radio/e07%20Cicadas.mp3",
+  "tracks": [
+    {
+      "artist": "FLOW & EDDY",
+      "title": "KEEP IT WARM"
+    },
+    {
+      "artist": "CLAP YOUR HANDS SAY YEAH",
+      "title": "THE SKIN OF MY YELLOW COUNTRY TEETH"
+    },
+    {
+      "artist": "JOBA",
+      "title": "AMERICAN FEVER"
+    },
+    {
+      "artist": "CAKE",
+      "title": "LONG LINE OF CARS"
+    },
+    {
+      "artist": "EMEFE",
+      "title": "SUN SPAT (2026)"
+    },
+    {
+      "artist": "KINGO HAMADA",
+      "title": "MACHI NO DORUFIN"
+    },
+    {
+      "artist": "BRIJEAN",
+      "title": "WORKING ON IT"
+    },
+    {
+      "artist": "MISS",
+      "title": "HIP HOP"
+    },
+    {
+      "artist": "ERIC B & RAKIM",
+      "title": "DON'T SWEAT THE TECHNIQUE"
+    },
+    {
+      "artist": "TORO Y MOI",
+      "title": "POSTMAN"
+    },
+    {
+      "artist": "TORO Y MOI",
+      "title": "MAGAZINE"
+    },
+    {
+      "artist": "TOM WAITS",
+      "title": "WAY DOWN IN THE HOLE"
+    },
+    {
+      "artist": "FRIENDSHIP",
+      "title": "ST. BONAVENTURE"
+    },
+    {
+      "artist": "ANDREW PRAHLOW",
+      "title": "TIMBER HEARTH"
+    },
+    {
+      "artist": "LUCKY PIERRE",
+      "title": "COOL SUMMER NIGHT"
+    },
+    {
+      "artist": "DIP IN THE POOL",
+      "title": "A SEEKER"
+    },
+    {
+      "artist": "CROWDED HOUSE",
+      "title": "DON'T DREAM IT'S OVER (EXTENDED)"
+    }
+  ]
+}
