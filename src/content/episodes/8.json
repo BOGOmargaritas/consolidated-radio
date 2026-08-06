@@ -1,0 +1,55 @@
+{
+  "number": 8,
+  "title": "EP08 | CUT THE RUG",
+  "date": "2026-08-6",
+  "published": true,
+  "description": "Cut the rug // Do the jitterbug. This one should make you move if its working right.",
+  "image": "/episode-icons/8.png",
+  "audioSrc": "https://bucket.consolidated.radio/e08%20Cut%20The%20Rug.mp3",
+  "tracks": [
+    {
+      "artist": "QUANTIC",
+      "title": "ATLANTIC OSCILLATIONS"
+    },
+    {
+      "artist": "THE STRIKERS",
+      "title": "BODY MUSIC"
+    },
+    {
+      "artist": "LITTLE BIG MAN",
+      "title": "I'LL TAKE YOU THERE"
+    },
+    {
+      "artist": "GENERAL PUBLIC",
+      "title": "TENDERNESS"
+    },
+    {
+      "artist": "JM BLACK",
+      "title": "LIPSTICK SHOUT"
+    },
+    {
+      "artist": "PARCELS",
+      "title": "CLOSETOWHY"
+    },
+    {
+      "artist": "SPLIFF",
+      "title": "S.O.S"
+    },
+    {
+      "artist": "SPACE",
+      "title": "MAGIC FLY (DOMENICO TORTI REMIX)"
+    },
+    {
+      "artist": "MIKE & RICH",
+      "title": "MR. FROSTY"
+    },
+    {
+      "artist": "JUSTICE",
+      "title": "D.A.N.C.E"
+    },
+    {
+      "artist": "FRANK OCEAN",
+      "title": "DEAR APRIL (JUSTICE REMIX)"
+    }
+  ]
+}
