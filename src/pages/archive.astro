@@ -21,7 +21,7 @@ const firstDate = first
   : "";
 ---
 
-<DefaultLayout title="Archive — Consolidated Radio" hideVisualizer>
+<DefaultLayout title="Archive — Consolidated Radio" hideVisualizer scrollNav>
   <div class="archive-flow">
     <div class="archive-content">
       <div class="ep-list" id="epList">
@@ -124,24 +124,13 @@ const firstDate = first
 
   /* ── LEFT: EPISODE LIST ────────────────────── */
 
+  /* No inner scroll container — the list runs its full length and the page
+     scrolls instead, with the detail panel staying stuck alongside it. */
   .ep-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 72vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
     padding-right: 8px;
-  }
-  .ep-list::-webkit-scrollbar {
-    width: 4px;
-  }
-  .ep-list::-webkit-scrollbar-thumb {
-    background: #c23b22;
-    border-radius: 2px;
-  }
-  .ep-list::-webkit-scrollbar-track {
-    background: transparent;
   }
 
   .latest-label {
@@ -299,7 +288,6 @@ const firstDate = first
 
     .ep-list {
       padding-right: 0;
-      max-height: 50vh;
     }
 
     .ep-detail {
@@ -307,12 +295,49 @@ const firstDate = first
       border-top: 2px solid rgba(255, 236, 220, 0.15);
       padding-top: 20px;
     }
+
+    /* On mobile the detail panel is moved inline, directly beneath the
+       selected card (see the placeDetail() script below). */
+    .ep-list .ep-detail {
+      border-top: none;
+      gap: 10px;
+      padding-top: 0;
+      padding-bottom: 14px;
+    }
+
+    /* The card right above it already shows the title. */
+    .ep-list .ep-detail .detail-header {
+      display: none;
+    }
   }
 </style>
 
 <script>
   const wrappers =
     document.querySelectorAll<HTMLDivElement>(".ep-card-wrapper");
+
+  const detailEl = document.getElementById("epDetail")!;
+  const contentEl = document.querySelector<HTMLDivElement>(".archive-content")!;
+  const mobile = window.matchMedia("(max-width: 900px)");
+
+  /**
+   * On mobile the detail panel lives inline, right under the selected card;
+   * on desktop it sits in its own column beside the list.
+   */
+  function placeDetail() {
+    if (mobile.matches) {
+      const active = document.querySelector<HTMLDivElement>(
+        ".ep-card-wrapper.active",
+      );
+      if (active && active.nextElementSibling !== detailEl) {
+        active.after(detailEl);
+      }
+    } else if (detailEl.parentElement !== contentEl) {
+      contentEl.appendChild(detailEl);
+    }
+  }
+
+  mobile.addEventListener("change", placeDetail);
 
   function selectEpisode(wrapper: HTMLDivElement) {
     wrappers.forEach((w) => w.classList.remove("active"));
@@ -338,6 +363,8 @@ const firstDate = first
           `<div class="track-row"><div class="dot"></div><div class="track-name">${t.artist} - ${t.title}</div></div>`,
       )
       .join("");
+
+    placeDetail();
   }
 
   wrappers.forEach((wrapper) => {
@@ -351,5 +378,7 @@ const firstDate = first
 
   if (wrappers.length > 0 && !wrappers[0].classList.contains("active")) {
     selectEpisode(wrappers[0]);
+  } else {
+    placeDetail();
   }
 </script>
