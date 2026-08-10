@@ -34,9 +34,11 @@ const firstDate = first
                 year: "numeric",
               })
               .replace(/\//g, ".");
+
             return (
               <>
                 {i === 0 && <div class="latest-label">LATEST EPISODE</div>}
+
                 <div
                   class={`ep-card-wrapper${i === 0 ? " active" : ""}`}
                   data-title={ep.data.title}
@@ -70,9 +72,11 @@ const firstDate = first
           style={first ? "" : "display:none"}
         >
           <div class="detail-desc-label">DESCRIPTION:</div>
+
           <div class="detail-description" id="descText">
             {first ? first.data.description : ""}
           </div>
+
           <div class="detail-date" id="descDate">{firstDate}</div>
         </div>
 
@@ -82,6 +86,7 @@ const firstDate = first
           style={first ? "" : "display:none"}
         >
           <div class="detail-tracklist-label">TRACKLIST:</div>
+
           <div class="detail-tracklist" id="tracklistEl">
             {
               first &&
@@ -151,6 +156,7 @@ const firstDate = first
       transform 0.12s,
       box-shadow 0.2s;
   }
+
   .ep-card-wrapper:hover {
   }
 
@@ -164,7 +170,7 @@ const firstDate = first
     margin: 0;
   }
 
-  /* ── RIGHT: DETAIL PANEL ───────────────────── */
+  /* ── RIGHT: DETAIL PANEL ──────────────────── */
 
   .ep-detail {
     display: flex;
@@ -173,6 +179,36 @@ const firstDate = first
     position: sticky;
     top: 30vh;
     padding-top: 22px;
+
+    /*
+     * Episode transition.
+     * The detail panel fades and slides slightly to the side when
+     * changing episodes.
+     */
+    opacity: 1;
+    transform: translateX(0);
+    transition:
+      opacity 0.28s ease,
+      transform 0.28s ease;
+
+    will-change: opacity, transform;
+  }
+
+  /*
+   * Directional animation classes.
+   *
+   * The JavaScript adds one of these before changing the content.
+   */
+  .ep-detail.is-changing {
+    opacity: 0;
+  }
+
+  .ep-detail.is-changing-left {
+    transform: translateX(-18px);
+  }
+
+  .ep-detail.is-changing-right {
+    transform: translateX(18px);
   }
 
   .detail-header {
@@ -273,6 +309,20 @@ const firstDate = first
     font-weight: 900;
   }
 
+  /* ── REDUCED MOTION ───────────────────────── */
+
+  @media (prefers-reduced-motion: reduce) {
+    .ep-detail {
+      transition: none;
+    }
+
+    .ep-detail.is-changing,
+    .ep-detail.is-changing-left,
+    .ep-detail.is-changing-right {
+      transform: none;
+    }
+  }
+
   /* ── RESPONSIVE ────────────────────────────── */
 
   @media (max-width: 900px) {
@@ -296,8 +346,10 @@ const firstDate = first
       padding-top: 20px;
     }
 
-    /* On mobile the detail panel is moved inline, directly beneath the
-       selected card (see the placeDetail() script below). */
+    /*
+     * On mobile the detail panel is moved inline, directly beneath
+     * the selected card.
+     */
     .ep-list .ep-detail {
       border-top: none;
       gap: 10px;
@@ -308,6 +360,18 @@ const firstDate = first
     /* The card right above it already shows the title. */
     .ep-list .ep-detail .detail-header {
       display: none;
+    }
+
+    /*
+     * Slightly smaller movement on mobile so the transition
+     * doesn't feel too dramatic on a small screen.
+     */
+    .ep-detail.is-changing-left {
+      transform: translateX(-10px);
+    }
+
+    .ep-detail.is-changing-right {
+      transform: translateX(10px);
     }
   }
 </style>
@@ -320,15 +384,28 @@ const firstDate = first
   const contentEl = document.querySelector<HTMLDivElement>(".archive-content")!;
   const mobile = window.matchMedia("(max-width: 900px)");
 
+  /*
+   * Prevents multiple overlapping animations if the user
+   * clicks several episodes quickly.
+   */
+  let animationTimer: number | null = null;
+
+  /*
+   * Keep track of which episode was previously selected.
+   * This lets the detail panel slide in different directions.
+   */
+  let previousIndex = 0;
+
   /**
-   * On mobile the detail panel lives inline, right under the selected card;
-   * on desktop it sits in its own column beside the list.
+   * On mobile the detail panel lives inline, right under the selected card.
+   * On desktop it sits in its own column beside the list.
    */
   function placeDetail() {
     if (mobile.matches) {
       const active = document.querySelector<HTMLDivElement>(
         ".ep-card-wrapper.active",
       );
+
       if (active && active.nextElementSibling !== detailEl) {
         active.after(detailEl);
       }
@@ -339,45 +416,150 @@ const firstDate = first
 
   mobile.addEventListener("change", placeDetail);
 
+  /*
+   * Change the episode information with an animated transition.
+   */
   function selectEpisode(wrapper: HTMLDivElement) {
+    const wrapperIndex = Array.from(wrappers).indexOf(wrapper);
+
+    /*
+     * Don't restart the animation if the user clicks
+     * the episode that's already selected.
+     */
+    if (wrapper.classList.contains("active")) {
+      return;
+    }
+
+    /*
+     * Determine which direction the new information should enter from.
+     */
+    const direction = wrapperIndex > previousIndex ? "right" : "left";
+
+    previousIndex = wrapperIndex;
+
+    /*
+     * Cancel any previous pending content swap.
+     */
+    if (animationTimer !== null) {
+      window.clearTimeout(animationTimer);
+      animationTimer = null;
+    }
+
+    /*
+     * Update the active episode immediately so mobile's
+     * placeDetail() knows where the panel belongs.
+     */
     wrappers.forEach((w) => w.classList.remove("active"));
     wrapper.classList.add("active");
 
-    const title = wrapper.dataset.title!;
-    const desc = wrapper.dataset.desc!;
-    const date = wrapper.dataset.date!;
-    const tracks: { artist: string; title: string }[] = JSON.parse(
-      wrapper.dataset.tracks!,
+    /*
+     * Start the outgoing animation.
+     */
+    detailEl.classList.remove("is-changing-left", "is-changing-right");
+
+    detailEl.classList.add(
+      "is-changing",
+      direction === "right" ? "is-changing-right" : "is-changing-left",
     );
 
-    document.getElementById("detailTitle")!.textContent = title;
-    document.getElementById("descText")!.textContent = desc;
-    document.getElementById("descDate")!.textContent = date;
-    document.getElementById("detailDesc")!.style.display = "";
-    document.getElementById("detailTrack")!.style.display = "";
+    /*
+     * Wait for the outgoing animation to finish before
+     * replacing the actual content.
+     */
+    animationTimer = window.setTimeout(() => {
+      const title = wrapper.dataset.title!;
+      const desc = wrapper.dataset.desc!;
+      const date = wrapper.dataset.date!;
 
-    const tl = document.getElementById("tracklistEl")!;
-    tl.innerHTML = tracks
-      .map(
-        (t) =>
-          `<div class="track-row"><div class="dot"></div><div class="track-name">${t.artist} - ${t.title}</div></div>`,
-      )
-      .join("");
+      const tracks: { artist: string; title: string }[] = JSON.parse(
+        wrapper.dataset.tracks!,
+      );
 
-    placeDetail();
+      /*
+       * Update title.
+       */
+      document.getElementById("detailTitle")!.textContent = title;
+
+      /*
+       * Update description and date.
+       */
+      document.getElementById("descText")!.textContent = desc;
+      document.getElementById("descDate")!.textContent = date;
+
+      document.getElementById("detailDesc")!.style.display = "";
+      document.getElementById("detailTrack")!.style.display = "";
+
+      /*
+       * Rebuild tracklist.
+       */
+      const tl = document.getElementById("tracklistEl")!;
+
+      tl.innerHTML = tracks
+        .map(
+          (t) =>
+            `<div class="track-row">
+              <div class="dot"></div>
+              <div class="track-name">${t.artist} - ${t.title}</div>
+            </div>`,
+        )
+        .join("");
+
+      /*
+       * On mobile this moves the information panel
+       * underneath the newly selected episode.
+       */
+      placeDetail();
+
+      /*
+       * Force the browser to recognize the new position before
+       * starting the incoming animation.
+       */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          detailEl.classList.remove(
+            "is-changing",
+            "is-changing-left",
+            "is-changing-right",
+          );
+        });
+      });
+
+      animationTimer = null;
+    }, 280);
   }
 
-  wrappers.forEach((wrapper) => {
+  /*
+   * Make every episode card selectable.
+   */
+  wrappers.forEach((wrapper, index) => {
     wrapper.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
-      if (target.closest(".scrubber-track") || target.closest(".vol-track"))
+
+      /*
+       * Don't change the selected episode when the user is
+       * interacting with the audio scrubber or volume control.
+       */
+      if (target.closest(".scrubber-track") || target.closest(".vol-track")) {
         return;
+      }
+
+      previousIndex = previousIndex ?? index;
       selectEpisode(wrapper);
     });
   });
 
-  if (wrappers.length > 0 && !wrappers[0].classList.contains("active")) {
-    selectEpisode(wrappers[0]);
+  /*
+   * Set up the initial episode.
+   */
+  if (wrappers.length > 0) {
+    const firstWrapper = wrappers[0];
+
+    if (!firstWrapper.classList.contains("active")) {
+      firstWrapper.classList.add("active");
+    }
+
+    previousIndex = 0;
+    placeDetail();
   } else {
     placeDetail();
   }
