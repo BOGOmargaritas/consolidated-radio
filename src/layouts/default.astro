@@ -14,6 +14,7 @@ const {
   hideVisualizer = false,
   scrollNav = false,
 } = Astro.props;
+
 const pathname = Astro.url.pathname;
 ---
 
@@ -23,32 +24,42 @@ const pathname = Astro.url.pathname;
     <meta name="theme-color" content="#000000" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
     <title>{title}</title>
+
     <link
       href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap"
       rel="stylesheet"
     />
+
     <link
       rel="icon"
       type="image/png"
       href="/favicon/favicon-96x96.png"
       sizes="96x96"
     />
+
     <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
     <link rel="shortcut icon" href="/favicon/favicon.ico" />
+
     <link
       rel="apple-touch-icon"
       sizes="180x180"
       href="/favicon/apple-touch-icon.png"
     />
+
     <link rel="manifest" href="/favicon/site.webmanifest" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap"
       rel="stylesheet"
     />
+
     <Analytics />
+
     <style is:inline>
       @font-face {
         font-family: "OPTIImprovNewWideNine";
@@ -166,20 +177,29 @@ const pathname = Astro.url.pathname;
       }
     </style>
   </head>
+
   <body class={scrollNav ? "scroll-nav" : undefined}>
     {!hideVisualizer && <canvas id="visualizer" />}
+
     <a href="/" class="logo">
       <img id="logoImg" src="/badge-cream-1.png" />
     </a>
+
     <nav class="site-nav">
       <a
         href="/archive/"
-        class={pathname.startsWith("/archive") ? "active" : ""}>ARCHIVE</a
+        class={pathname.startsWith("/archive") ? "active" : ""}
       >
+        ARCHIVE
+      </a>
     </nav>
+
     <div class="ffs">
-      <a href="https://fruitfly.supply"><img src="/ffspin.png" /></a>
+      <a href="https://fruitfly.supply">
+        <img src="/ffspin.png" />
+      </a>
     </div>
+
     <slot />
   </body>
 </html>
@@ -196,6 +216,14 @@ const pathname = Astro.url.pathname;
   let freqData: Uint8Array<ArrayBuffer> | null = null;
   const connectedElements = new WeakSet<HTMLAudioElement>();
   let playing = false;
+
+  // Tracks the currently scheduled animation frame.
+  // This lets us completely stop the visualizer when the page
+  // becomes hidden.
+  let animationFrame: number | null = null;
+
+  // Tracks whether the page is currently visible.
+  let pageVisible = document.visibilityState === "visible";
 
   if (canvas) {
     const ctx = canvas.getContext("2d")!;
@@ -219,7 +247,7 @@ const pathname = Astro.url.pathname;
       vizScale = isMobile
         ? Math.min(1.2, baseScale * 0.8)
         : isTall
-          ? baseScale * 0.82 * 1.04 // scales up on tall screens (no cap)
+          ? baseScale * 0.82 * 1.04
           : Math.min(1.0, baseScale * 0.82);
     }
 
@@ -230,31 +258,81 @@ const pathname = Astro.url.pathname;
       if (!audioCtx) {
         audioCtx = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
+
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 512;
+
         freqData = new Uint8Array(
           analyser.frequencyBinCount,
         ) as Uint8Array<ArrayBuffer>;
+
         analyser.connect(audioCtx.destination);
       }
+
       if (connectedElements.has(el)) return;
+
       const source = audioCtx.createMediaElementSource(el);
       source.connect(analyser!);
       connectedElements.add(el);
+
       audioCtx.resume();
+    }
+
+    // ── VISIBILITY ─────────────────────────────
+
+    function stopVisualizer() {
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+    }
+
+    function startVisualizer() {
+      // Don't create duplicate animation loops.
+      if (animationFrame !== null) return;
+
+      // Never animate while the page is hidden.
+      if (!pageVisible) return;
+
+      animationFrame = requestAnimationFrame(draw);
     }
 
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
-        playing = false;
+        // The user has switched apps, locked the phone,
+        // or otherwise backgrounded the page.
+
+        pageVisible = false;
+
+        // IMPORTANT:
+        // We stop ONLY the visualizer.
+        // We do NOT pause the audio.
+        stopVisualizer();
+
+        // The logo animation is also stopped while hidden.
+        stopLogoAnimation();
       } else {
+        // The user has returned to the page.
+
+        pageVisible = true;
+
+        // Check whether audio continued playing while
+        // the page was hidden.
         const audios = document.querySelectorAll("audio");
+
         playing = Array.from(audios).some((a) => !a.paused);
+
+        if (playing) {
+          startVisualizer();
+          startLogoAnimation();
+        }
       }
     });
 
     document.addEventListener("touchstart", () => {
-      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
     });
 
     document.addEventListener(
@@ -262,8 +340,13 @@ const pathname = Astro.url.pathname;
       (e) => {
         if ((e.target as HTMLElement).tagName === "AUDIO") {
           connectAudio(e.target as HTMLAudioElement);
+
           playing = true;
-          startLogoAnimation();
+
+          if (pageVisible) {
+            startVisualizer();
+            startLogoAnimation();
+          }
         }
       },
       true,
@@ -274,6 +357,8 @@ const pathname = Astro.url.pathname;
       (e) => {
         if ((e.target as HTMLElement).tagName === "AUDIO") {
           playing = false;
+
+          stopVisualizer();
           stopLogoAnimation();
         }
       },
@@ -285,6 +370,8 @@ const pathname = Astro.url.pathname;
       (e) => {
         if ((e.target as HTMLElement).tagName === "AUDIO") {
           playing = false;
+
+          stopVisualizer();
           stopLogoAnimation();
         }
       },
@@ -294,9 +381,16 @@ const pathname = Astro.url.pathname;
     // ── PERLIN NOISE ──────────────────────────────
 
     const perm = new Uint8Array(512);
-    for (let i = 0; i < 256; i++) perm[i] = i;
+
+    for (let i = 0; i < 256; i++) {
+      perm[i] = i;
+    }
+
     perm.sort(() => Math.random() - 0.5);
-    for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+    for (let i = 0; i < 256; i++) {
+      perm[i + 256] = perm[i];
+    }
 
     function fade(t: number) {
       return t * t * t * (t * (t * 6 - 15) + 10);
@@ -308,18 +402,23 @@ const pathname = Astro.url.pathname;
 
     function grad(hash: number, x: number, y: number) {
       const h = hash & 3;
+
       return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
     }
 
     function noise(x: number, y: number) {
       let X = Math.floor(x) & 255;
       let Y = Math.floor(y) & 255;
+
       x -= Math.floor(x);
       y -= Math.floor(y);
+
       const u = fade(x);
       const v = fade(y);
+
       const a = perm[X] + Y;
       const b = perm[X + 1] + Y;
+
       return lerp(
         lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
         lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
@@ -342,8 +441,14 @@ const pathname = Astro.url.pathname;
     let time = 0;
 
     function draw() {
+      // If the page was hidden between animation frames,
+      // stop immediately and do not schedule another frame.
+      if (!pageVisible) {
+        animationFrame = null;
+        return;
+      }
+
       ctx.clearRect(0, 0, w, h);
-      requestAnimationFrame(draw);
 
       const bass =
         analyser && freqData
@@ -368,9 +473,11 @@ const pathname = Astro.url.pathname;
 
       rings.forEach((r) => {
         r.rotation += (r.speed + treble * 0.005) * ease;
+
         const currentRadius = r.radius * s + bass * 100 * s * ease;
 
         ctx.save();
+
         ctx.translate(cx, cy);
         ctx.rotate(r.rotation);
         ctx.beginPath();
@@ -379,6 +486,7 @@ const pathname = Astro.url.pathname;
 
         for (let p = 0; p <= points; p++) {
           const angle = (p / points) * Math.PI * 2;
+
           const wiggle =
             noise(
               Math.cos(angle) * 5 + r.noiseOffset + time,
@@ -396,6 +504,7 @@ const pathname = Astro.url.pathname;
         }
 
         ctx.closePath();
+
         // glow passes 1, 2, 3, 4 -- opacity stacks
         ctx.shadowBlur = 12 * s;
         ctx.shadowColor = "#ffecdc";
@@ -420,14 +529,26 @@ const pathname = Astro.url.pathname;
         ctx.strokeStyle = "#ffecdc";
         ctx.lineWidth = (1.5 + bass * 0.5 * ease) * s;
         ctx.stroke();
+
         ctx.strokeStyle = "#ffecdc";
         ctx.lineWidth = (3 + bass * 1 * ease) * s;
         ctx.stroke();
+
         ctx.shadowBlur = 0;
         ctx.restore();
       });
+
+      // Only schedule the next frame if the page is still visible.
+      if (pageVisible) {
+        animationFrame = requestAnimationFrame(draw);
+      } else {
+        animationFrame = null;
+      }
     }
 
+    // IMPORTANT:
+    // Start the visualizer exactly as the original code did.
+    // This is what I accidentally removed in my previous version.
     draw();
   }
 
@@ -447,7 +568,13 @@ const pathname = Astro.url.pathname;
   function startLogoAnimation() {
     if (logoInterval) return;
     if (!logoImg) return;
+
     logoInterval = setInterval(() => {
+      if (document.visibilityState !== "visible") {
+        stopLogoAnimation();
+        return;
+      }
+
       logoIndex = (logoIndex + 1) % logos.length;
       logoImg.src = logos[logoIndex];
     }, 1000);
@@ -456,6 +583,7 @@ const pathname = Astro.url.pathname;
   function stopLogoAnimation() {
     if (!logoImg) return;
     if (!logoInterval) return;
+
     clearInterval(logoInterval);
     logoInterval = null;
     logoIndex = 0;
