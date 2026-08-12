@@ -14,6 +14,7 @@ const {
   hideVisualizer = false,
   scrollNav = false,
 } = Astro.props;
+
 const pathname = Astro.url.pathname;
 ---
 
@@ -23,32 +24,42 @@ const pathname = Astro.url.pathname;
     <meta name="theme-color" content="#000000" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+
     <title>{title}</title>
+
     <link
       href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap"
       rel="stylesheet"
     />
+
     <link
       rel="icon"
       type="image/png"
       href="/favicon/favicon-96x96.png"
       sizes="96x96"
     />
+
     <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
     <link rel="shortcut icon" href="/favicon/favicon.ico" />
+
     <link
       rel="apple-touch-icon"
       sizes="180x180"
       href="/favicon/apple-touch-icon.png"
     />
+
     <link rel="manifest" href="/favicon/site.webmanifest" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Vina+Sans&display=swap"
       rel="stylesheet"
     />
+
     <Analytics />
+
     <style is:inline>
       @font-face {
         font-family: "OPTIImprovNewWideNine";
@@ -166,20 +177,29 @@ const pathname = Astro.url.pathname;
       }
     </style>
   </head>
+
   <body class={scrollNav ? "scroll-nav" : undefined}>
     {!hideVisualizer && <canvas id="visualizer" />}
+
     <a href="/" class="logo">
       <img id="logoImg" src="/badge-cream-1.png" />
     </a>
+
     <nav class="site-nav">
       <a
         href="/archive/"
-        class={pathname.startsWith("/archive") ? "active" : ""}>ARCHIVE</a
+        class={pathname.startsWith("/archive") ? "active" : ""}
       >
+        ARCHIVE
+      </a>
     </nav>
+
     <div class="ffs">
-      <a href="https://fruitfly.supply"><img src="/ffspin.png" /></a>
+      <a href="https://fruitfly.supply">
+        <img src="/ffspin.png" />
+      </a>
     </div>
+
     <slot />
   </body>
 </html>
@@ -194,19 +214,37 @@ const pathname = Astro.url.pathname;
   let audioCtx: AudioContext | null = null;
   let analyser: AnalyserNode | null = null;
   let freqData: Uint8Array<ArrayBuffer> | null = null;
+
   const connectedElements = new WeakSet<HTMLAudioElement>();
+
+  // True when audio is actually playing.
   let playing = false;
+
+  // True when the page is visible.
+  let pageVisible = document.visibilityState === "visible";
 
   if (canvas) {
     const ctx = canvas.getContext("2d")!;
 
     const VIZ_REF_PX = 800;
-    let w: number, h: number, cx: number, cy: number;
+
+    let w: number;
+    let h: number;
+    let cx: number;
+    let cy: number;
     let vizScale = 1;
+
+    // ── ANIMATION STATE ─────────────────────────
+
+    // Keeps track of the currently running requestAnimationFrame.
+    // This is the important part: the visualizer can now be explicitly
+    // stopped instead of continuously scheduling itself forever.
+    let animationFrame: number | null = null;
 
     function resize() {
       w = canvas!.width = window.innerWidth;
       h = canvas!.height = window.innerHeight;
+
       cx = w / 2;
       cy = h * 0.54;
 
@@ -219,51 +257,146 @@ const pathname = Astro.url.pathname;
       vizScale = isMobile
         ? Math.min(1.2, baseScale * 0.8)
         : isTall
-          ? baseScale * 0.82 * 1.04 // scales up on tall screens (no cap)
+          ? baseScale * 0.82 * 1.04
           : Math.min(1.0, baseScale * 0.82);
     }
 
     resize();
     window.addEventListener("resize", resize);
 
+    // ── AUDIO CONNECTION ────────────────────────
+
     function connectAudio(el: HTMLAudioElement) {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
+
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 512;
+
         freqData = new Uint8Array(
           analyser.frequencyBinCount,
         ) as Uint8Array<ArrayBuffer>;
+
         analyser.connect(audioCtx.destination);
       }
+
       if (connectedElements.has(el)) return;
+
       const source = audioCtx.createMediaElementSource(el);
+
       source.connect(analyser!);
       connectedElements.add(el);
+
       audioCtx.resume();
+    }
+
+    // ── VISIBILITY HANDLING ─────────────────────
+
+    function stopVisualizer() {
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+      }
+
+      // Clear the canvas while hidden so there isn't a stale frame
+      // sitting underneath the page when the user returns.
+      ctx.clearRect(0, 0, w, h);
+    }
+
+    function startVisualizer() {
+      // Never start a second animation loop.
+      if (animationFrame !== null) return;
+
+      // Do not run the visualizer while the page is hidden.
+      if (!pageVisible) return;
+
+      // Do not run it when there is no audio playing.
+      if (!playing) return;
+
+      animationFrame = requestAnimationFrame(draw);
+    }
+
+    function handlePageHidden() {
+      pageVisible = false;
+
+      // IMPORTANT:
+      // Stop the visualizer immediately, but do NOT pause the audio.
+      stopVisualizer();
+
+      // The logo animation is also unnecessary while the app is
+      // backgrounded, so stop that as well.
+      stopLogoAnimation();
+    }
+
+    function handlePageVisible() {
+      pageVisible = true;
+
+      // Check the actual audio elements rather than assuming that
+      // a play/pause event occurred while the page was hidden.
+      const audios = document.querySelectorAll<HTMLAudioElement>("audio");
+
+      playing = Array.from(audios).some((audio) => !audio.paused);
+
+      if (playing) {
+        startVisualizer();
+        startLogoAnimation();
+      }
     }
 
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") {
-        playing = false;
+        handlePageHidden();
       } else {
-        const audios = document.querySelectorAll("audio");
-        playing = Array.from(audios).some((a) => !a.paused);
+        handlePageVisible();
       }
     });
 
-    document.addEventListener("touchstart", () => {
-      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    // pagehide provides an additional safeguard for mobile browsers
+    // when the browser moves the document out of the active page.
+    window.addEventListener("pagehide", () => {
+      handlePageHidden();
     });
+
+    // pageshow handles returning from a pagehide event.
+    window.addEventListener("pageshow", () => {
+      pageVisible = document.visibilityState === "visible";
+
+      if (pageVisible) {
+        const audios = document.querySelectorAll<HTMLAudioElement>("audio");
+
+        playing = Array.from(audios).some((audio) => !audio.paused);
+
+        if (playing) {
+          startVisualizer();
+          startLogoAnimation();
+        }
+      }
+    });
+
+    // ── MOBILE AUDIO CONTEXT ────────────────────
+
+    document.addEventListener("touchstart", () => {
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    });
+
+    // ── AUDIO EVENTS ────────────────────────────
 
     document.addEventListener(
       "play",
       (e) => {
         if ((e.target as HTMLElement).tagName === "AUDIO") {
           connectAudio(e.target as HTMLAudioElement);
+
           playing = true;
-          startLogoAnimation();
+
+          // Only animate if the page is currently visible.
+          if (pageVisible) {
+            startVisualizer();
+            startLogoAnimation();
+          }
         }
       },
       true,
@@ -274,6 +407,8 @@ const pathname = Astro.url.pathname;
       (e) => {
         if ((e.target as HTMLElement).tagName === "AUDIO") {
           playing = false;
+
+          stopVisualizer();
           stopLogoAnimation();
         }
       },
@@ -285,18 +420,27 @@ const pathname = Astro.url.pathname;
       (e) => {
         if ((e.target as HTMLElement).tagName === "AUDIO") {
           playing = false;
+
+          stopVisualizer();
           stopLogoAnimation();
         }
       },
       true,
     );
 
-    // ── PERLIN NOISE ──────────────────────────────
+    // ── PERLIN NOISE ────────────────────────────
 
     const perm = new Uint8Array(512);
-    for (let i = 0; i < 256; i++) perm[i] = i;
+
+    for (let i = 0; i < 256; i++) {
+      perm[i] = i;
+    }
+
     perm.sort(() => Math.random() - 0.5);
-    for (let i = 0; i < 256; i++) perm[i + 256] = perm[i];
+
+    for (let i = 0; i < 256; i++) {
+      perm[i + 256] = perm[i];
+    }
 
     function fade(t: number) {
       return t * t * t * (t * (t * 6 - 15) + 10);
@@ -308,18 +452,23 @@ const pathname = Astro.url.pathname;
 
     function grad(hash: number, x: number, y: number) {
       const h = hash & 3;
+
       return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
     }
 
     function noise(x: number, y: number) {
       let X = Math.floor(x) & 255;
       let Y = Math.floor(y) & 255;
+
       x -= Math.floor(x);
       y -= Math.floor(y);
+
       const u = fade(x);
       const v = fade(y);
+
       const a = perm[X] + Y;
       const b = perm[X + 1] + Y;
+
       return lerp(
         lerp(grad(perm[a], x, y), grad(perm[b], x - 1, y), u),
         lerp(grad(perm[a + 1], x, y - 1), grad(perm[b + 1], x - 1, y - 1), u),
@@ -327,7 +476,7 @@ const pathname = Astro.url.pathname;
       );
     }
 
-    // ── RING DRAWING LOOP ─────────────────────────
+    // ── RING DRAWING LOOP ───────────────────────
 
     const rings = Array.from({ length: 6 }, (_, i) => ({
       radius: (i + 1) * 40,
@@ -342,8 +491,14 @@ const pathname = Astro.url.pathname;
     let time = 0;
 
     function draw() {
+      // The animation may have been cancelled between frames.
+      if (!pageVisible || !playing) {
+        animationFrame = null;
+        return;
+      }
+
+      // Clear the previous frame.
       ctx.clearRect(0, 0, w, h);
-      requestAnimationFrame(draw);
 
       const bass =
         analyser && freqData
@@ -362,15 +517,19 @@ const pathname = Astro.url.pathname;
 
       ease = lerp(ease, playing ? 1 : 0, easeSpeed);
 
-      if (playing) time += 0.01;
+      if (playing) {
+        time += 0.01;
+      }
 
       const s = vizScale;
 
       rings.forEach((r) => {
         r.rotation += (r.speed + treble * 0.005) * ease;
+
         const currentRadius = r.radius * s + bass * 100 * s * ease;
 
         ctx.save();
+
         ctx.translate(cx, cy);
         ctx.rotate(r.rotation);
         ctx.beginPath();
@@ -379,6 +538,7 @@ const pathname = Astro.url.pathname;
 
         for (let p = 0; p <= points; p++) {
           const angle = (p / points) * Math.PI * 2;
+
           const wiggle =
             noise(
               Math.cos(angle) * 5 + r.noiseOffset + time,
@@ -390,13 +550,15 @@ const pathname = Astro.url.pathname;
             (1 + treble * 0.5 * r.trebleFactor);
 
           const x = Math.cos(angle) * (currentRadius + wiggle);
+
           const y = Math.sin(angle) * (currentRadius + wiggle);
 
           p === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
 
         ctx.closePath();
-        // glow passes 1, 2, 3, 4 -- opacity stacks
+
+        // Glow passes 1, 2, 3, 4 -- opacity stacks
         ctx.shadowBlur = 12 * s;
         ctx.shadowColor = "#ffecdc";
         ctx.strokeStyle = "#ffecdc";
@@ -415,20 +577,25 @@ const pathname = Astro.url.pathname;
         ctx.shadowColor = "#ffecdc";
         ctx.stroke();
 
-        // subtle inner line to keep it crisp
+        // Subtle inner line to keep it crisp
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "#ffecdc";
         ctx.lineWidth = (1.5 + bass * 0.5 * ease) * s;
         ctx.stroke();
+
         ctx.strokeStyle = "#ffecdc";
         ctx.lineWidth = (3 + bass * 1 * ease) * s;
         ctx.stroke();
+
         ctx.shadowBlur = 0;
+
         ctx.restore();
       });
-    }
 
-    draw();
+      // Schedule the next frame ONLY while the page is visible
+      // and audio is playing.
+      animationFrame = requestAnimationFrame(draw);
+    }
   }
 
   // ── LOGO ANIMATION ──────────────────────────
@@ -447,7 +614,17 @@ const pathname = Astro.url.pathname;
   function startLogoAnimation() {
     if (logoInterval) return;
     if (!logoImg) return;
+
+    // Never run the logo animation while the document is hidden.
+    if (document.visibilityState !== "visible") return;
+
     logoInterval = setInterval(() => {
+      // Extra safety check for mobile browsers.
+      if (document.visibilityState !== "visible") {
+        stopLogoAnimation();
+        return;
+      }
+
       logoIndex = (logoIndex + 1) % logos.length;
       logoImg.src = logos[logoIndex];
     }, 1000);
@@ -456,7 +633,9 @@ const pathname = Astro.url.pathname;
   function stopLogoAnimation() {
     if (!logoImg) return;
     if (!logoInterval) return;
+
     clearInterval(logoInterval);
+
     logoInterval = null;
     logoIndex = 0;
     logoImg.src = logos[0];
