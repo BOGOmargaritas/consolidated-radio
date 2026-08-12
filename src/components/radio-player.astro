@@ -44,6 +44,7 @@ console.log(image);
     playsinline
     webkit-playsinline
     preload="metadata"></audio>
+
   <div
     class="player-wrapper"
     style={playerStyle || undefined}
@@ -75,6 +76,7 @@ console.log(image);
                   <div class="scrubber-fill"></div>
                   <div class="scrubber-thumb"></div>
                 </div>
+
                 <div class="time-row">
                   <span class="time-cur">00.00</span>
                   <span class="time-end">00.00</span>
@@ -106,6 +108,7 @@ console.log(image);
                     d="M94.11,703.71l867.93-1.85c114.08,0,112.08,204.3-.34,204.3H93.01c-115.64,0-103.64-202.45,1.1-202.45Z"
                   ></path>
                 </svg>
+
                 INFO
               </button>
 
@@ -141,7 +144,7 @@ console.log(image);
                       d="M122.94,573.07h-57.26c-17.68,0-32.02-14.33-32.02-32.02v-99.46c0-182.61,148.04-330.65,330.65-330.65h482.85v121.29h-482.85c-115.63,0-209.36,93.74-209.36,209.36v99.46c0,17.68-14.33,32.02-32.02,32.02Z"
                     ></path>
                     <path
-                      d="M1051.7,196.92l-199.8,115.35c-19.5,11.26-43.88-2.81-43.88-25.33V56.23c0-22.52,24.38-36.59,43.88-25.33l199.8,115.35c19.5,11.26,19.5,39.41,0,50.67Z"
+                      d="M1051.7,196.92l-199.8,115.35c-19.5,11.26-43.88-2.81-43.88-25.33V56.23c0-22.52-24.38-36.59-43.88-25.33l-199.8,115.35c-19.5,11.26-19.5,39.41,0,50.67Z"
                     ></path>
                     <path
                       d="M494.14,450.15c8.51,11.68,7.06,28.71,1.95,39.9-15.08,32.84-57.17,42.57-107.52,42.57-56.44,0-98.04-4.86-121.14-38.19-7.06-10.46-10.22-21.65-10.22-32.6h71.76c1.95,2.67,1.22,3.65,5.84,9,15.33,17.76,49.87,14.59,54.98,14.35,9.73-.24,26.03-2.43,26.03-16.3,0-14.84-24.81-17.51-40.62-17.51h-24.33v-44.52h22.14c12.41,0,27.98,1.7,35.52-8.51,1.46-2.19,1.95-5.35.73-9-2.67-7.06-9.49-8.27-17.03-9.73-12.41-1.7-49.63-2.92-60.09,19.46h-68.6c4.62-50.11,49.14-63.49,121.63-63.49,41.6,0,84.17,3.16,102.17,31.62,7.78,12.41,6.32,24.08,2.19,33.08-7.54,16.79-29.19,20.92-46.22,24.33l-6.81,1.7c17.76,2.43,42.09,2.43,57.65,23.84Z"
@@ -157,12 +160,14 @@ console.log(image);
                 <svg class="vol-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <polygon points="2,9 7,9 13,4 13,20 7,15 2,15" fill="#ffecdc"
                   ></polygon>
+
                   <path
                     d="M16 9c1.5 1.5 1.5 4.5 0 6"
                     stroke="#ffecdc"
                     stroke-width="2"
                     stroke-linecap="round"
                     fill="none"></path>
+
                   <path
                     d="M19 7c3 3 3 7 0 10"
                     stroke="#ffecdc"
@@ -189,6 +194,7 @@ console.log(image);
 
           <div class="tracklist-section">
             <div class="tracklist-label">TRACKLIST:</div>
+
             <div class="tracklist">
               {tracks.map(({ artist, title }) => (
                 <div class="track-row">
@@ -538,30 +544,30 @@ console.log(image);
 
 <script>
   const PLAY = `<path d="M 22 20 Q 22 16 25.4 18.1 L 56.6 37.9 Q 60 40 56.6 42.1 L 25.4 61.9 Q 22 64 22 60 Z" fill="#ffecdc"/>`;
+
   const PAUSE = `<rect x="22" y="18" width="12" height="44" rx="4" fill="#ffecdc"/><rect x="44" y="18" width="12" height="44" rx="4" fill="#ffecdc"/>`;
 
   function formatTime(s: number) {
     if (isNaN(s) || s < 0) return "00.00";
+
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
     const sec = Math.floor(s % 60);
+
     if (h > 0) {
       return `${String(h).padStart(2, "0")}.${String(m).padStart(2, "0")}.${String(sec).padStart(2, "0")}`;
     }
+
     return `${String(m).padStart(2, "0")}.${String(sec).padStart(2, "0")}`;
   }
 
   /**
-   * Push the current playback position to the OS media controls (iOS lock
-   * screen / Control Center) so the seek-forward/back buttons there compute
-   * their jump from the real current time rather than a stale one. Without
-   * calling this repeatedly (not just once at load), iOS's internal clock
-   * drifts from the audio element once the tab is backgrounded, which is
-   * what produces the wrong seek-forward amount.
+   * Push the current playback position to the OS media controls.
    */
   function syncPositionState(audio: HTMLAudioElement) {
     if (!("mediaSession" in navigator)) return;
     if (!audio.duration || isNaN(audio.duration)) return;
+
     try {
       navigator.mediaSession.setPositionState({
         duration: audio.duration,
@@ -569,48 +575,270 @@ console.log(image);
         position: Math.min(audio.currentTime, audio.duration),
       });
     } catch {
-      // setPositionState can throw if called with invalid/mismatched values
-      // mid-transition (e.g. during a seek); safe to ignore and retry on the
-      // next timeupdate tick.
+      // setPositionState can throw during transitions/seeks.
     }
   }
+
+  /*
+   * ────────────────────────────────────────────────
+   * WEB AUDIO / VISUALIZER CONNECTION
+   * ────────────────────────────────────────────────
+   *
+   * The important change is here.
+   *
+   * While the page is visible:
+   *
+   *   <audio>
+   *      ↓
+   *   MediaElementSource
+   *      ↓
+   *   AnalyserNode
+   *      ↓
+   *   AudioContext.destination
+   *
+   * When the page becomes hidden:
+   *
+   *   <audio>
+   *      ↓
+   *   MediaElementSource
+   *      ↓
+   *   AudioContext.destination
+   *
+   * The analyser is therefore completely bypassed while the phone is
+   * locked or another app is brought to the foreground.
+   *
+   * We do NOT recreate MediaElementSource objects. The Web Audio API
+   * only allows one MediaElementSource per HTMLAudioElement.
+   */
+
+  let audioContext: AudioContext | null = null;
+  let analyser: AnalyserNode | null = null;
+
+  const audioSources = new WeakMap<
+    HTMLAudioElement,
+    MediaElementAudioSourceNode
+  >();
+
+  const connectedToAnalyser = new WeakSet<HTMLAudioElement>();
+
+  function getAudioContext() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+    }
+
+    return audioContext;
+  }
+
+  function getAnalyser() {
+    const ctx = getAudioContext();
+
+    if (!analyser) {
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 512;
+
+      analyser.connect(ctx.destination);
+    }
+
+    return analyser;
+  }
+
+  function getAudioSource(audio: HTMLAudioElement) {
+    let source = audioSources.get(audio);
+
+    if (!source) {
+      const ctx = getAudioContext();
+
+      source = ctx.createMediaElementSource(audio);
+      audioSources.set(audio, source);
+    }
+
+    return source;
+  }
+
+  /**
+   * Connect an audio element through the analyser.
+   *
+   * Used while the page is visible.
+   */
+  function connectToAnalyser(audio: HTMLAudioElement) {
+    const source = getAudioSource(audio);
+    const analyserNode = getAnalyser();
+
+    if (connectedToAnalyser.has(audio)) return;
+
+    /*
+     * Make sure the source isn't still connected directly to the
+     * destination from a previous background state.
+     */
+    try {
+      source.disconnect(audioContext!.destination);
+    } catch {
+      // It wasn't connected directly. That's fine.
+    }
+
+    source.connect(analyserNode);
+
+    connectedToAnalyser.add(audio);
+
+    /*
+     * The AudioContext may have been suspended by the browser.
+     * Resume it when we're returning to the visible page.
+     */
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+  }
+
+  /**
+   * Bypass the analyser.
+   *
+   * This is the critical background-mode behavior.
+   */
+  function bypassAnalyser(audio: HTMLAudioElement) {
+    const source = audioSources.get(audio);
+
+    if (!source) return;
+
+    /*
+     * Disconnect this source from the analyser.
+     */
+    if (connectedToAnalyser.has(audio)) {
+      try {
+        source.disconnect(analyser!);
+      } catch {
+        // Already disconnected.
+      }
+
+      connectedToAnalyser.delete(audio);
+    }
+
+    /*
+     * Send the MediaElementSource directly to the destination.
+     *
+     * The audio element itself is NOT paused.
+     */
+    if (audioContext) {
+      try {
+        source.connect(audioContext.destination);
+      } catch {
+        // Already connected.
+      }
+    }
+  }
+
+  /**
+   * Restore analyser routing when the user comes back.
+   */
+  function restoreAnalyser(audio: HTMLAudioElement) {
+    const source = audioSources.get(audio);
+
+    if (!source) return;
+
+    try {
+      source.disconnect(audioContext!.destination);
+    } catch {
+      // It wasn't directly connected.
+    }
+
+    connectToAnalyser(audio);
+  }
+
+  /**
+   * Put every active audio element into direct-output mode when the
+   * document is backgrounded.
+   */
+  function bypassAllAnalysers() {
+    document
+      .querySelectorAll<HTMLAudioElement>(".radio-player-root audio")
+      .forEach((audio) => {
+        if (!audio.paused) {
+          bypassAnalyser(audio);
+        }
+      });
+  }
+
+  /**
+   * Restore analyser routing for any audio elements that are still
+   * playing when the user returns.
+   */
+  function restoreAllAnalysers() {
+    document
+      .querySelectorAll<HTMLAudioElement>(".radio-player-root audio")
+      .forEach((audio) => {
+        if (!audio.paused) {
+          restoreAnalyser(audio);
+        }
+      });
+  }
+
+  /*
+   * This is deliberately a visibility-only handler.
+   *
+   * IMPORTANT:
+   * We never call audio.pause() here.
+   */
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      /*
+       * Phone locked / app switched.
+       *
+       * Bypass the visualizer's analyser immediately.
+       * The <audio> element continues playing.
+       */
+      bypassAllAnalysers();
+    } else {
+      /*
+       * User returned.
+       *
+       * Put still-playing audio back through the analyser.
+       */
+      restoreAllAnalysers();
+    }
+  });
+
+  /*
+   * ────────────────────────────────────────────────
+   * PLAYER SETUP
+   * ────────────────────────────────────────────────
+   */
 
   document
     .querySelectorAll<HTMLElement>(".radio-player-root")
     .forEach((root) => {
       const wrapper = root.querySelector<HTMLElement>(".player-wrapper")!;
+
       const audio = root.querySelector<HTMLAudioElement>("audio")!;
-      const skipTime = 30; // Time in seconds
-      audio.crossOrigin = "anonymous";
 
-      /** Attempt to fix lockscreen seek showing wrong number */
-      if ("mediaSession" in navigator) {
-        navigator.mediaSession.setActionHandler("play", () => {
-          audio.play();
-        });
+      const playBtn = root.querySelector<HTMLButtonElement>(".play-btn")!;
 
-        navigator.mediaSession.setActionHandler("pause", () => {
-          audio.pause();
-        });
+      const playIcon = root.querySelector<SVGElement>(".play-icon")!;
 
-        navigator.mediaSession.setActionHandler("seekforward", (details) => {
-          audio.currentTime += details.seekOffset || 30;
-          syncPositionState(audio);
-        });
+      const scrub = root.querySelector<HTMLElement>(".scrubber-track")!;
 
-        navigator.mediaSession.setActionHandler("seekbackward", (details) => {
-          audio.currentTime -= details.seekOffset || 10;
-          syncPositionState(audio);
-        });
+      const fill = root.querySelector<HTMLElement>(".scrubber-fill")!;
 
-        navigator.mediaSession.setActionHandler("seekto", (details) => {
-          if (details.seekTime != null) {
-            audio.currentTime = details.seekTime;
-            syncPositionState(audio);
-          }
-        });
-      }
-      /** End attempt*/
+      const thumb = root.querySelector<HTMLElement>(".scrubber-thumb")!;
+
+      const tCur = root.querySelector<HTMLElement>(".time-cur")!;
+
+      const tEnd = root.querySelector<HTMLElement>(".time-end")!;
+
+      const vol = root.querySelector<HTMLElement>(".vol-track")!;
+
+      const vFill = root.querySelector<HTMLElement>(".vol-fill")!;
+
+      const vThumb = root.querySelector<HTMLElement>(".vol-thumb")!;
+
+      const skipBackBtn =
+        root.querySelector<HTMLButtonElement>(".skip-back-btn")!;
+
+      const skipFwdBtn =
+        root.querySelector<HTMLButtonElement>(".skip-fwd-btn")!;
+
+      const infoBtn = root.querySelector<HTMLButtonElement>(".info-btn");
+
+      const infoPanel = root.querySelector<HTMLElement>(".info-panel");
 
       const title =
         root.querySelector(".ep-title")?.textContent?.trim() ??
@@ -618,40 +846,38 @@ console.log(image);
 
       const artwork = "https://consolidated.radio/episodeimage.png";
 
-      const playBtn = root.querySelector<HTMLButtonElement>(".play-btn")!;
-      const playIcon = root.querySelector<SVGElement>(".play-icon")!;
-      const scrub = root.querySelector<HTMLElement>(".scrubber-track")!;
-      const fill = root.querySelector<HTMLElement>(".scrubber-fill")!;
-      const thumb = root.querySelector<HTMLElement>(".scrubber-thumb")!;
-      const tCur = root.querySelector<HTMLElement>(".time-cur")!;
-      const tEnd = root.querySelector<HTMLElement>(".time-end")!;
-      const vol = root.querySelector<HTMLElement>(".vol-track")!;
-      const vFill = root.querySelector<HTMLElement>(".vol-fill")!;
-      const vThumb = root.querySelector<HTMLElement>(".vol-thumb")!;
-      const skipBackBtn =
-        root.querySelector<HTMLButtonElement>(".skip-back-btn")!;
-      const skipFwdBtn =
-        root.querySelector<HTMLButtonElement>(".skip-fwd-btn")!;
-      const infoBtn = root.querySelector<HTMLButtonElement>(".info-btn");
-      const infoPanel = root.querySelector<HTMLElement>(".info-panel");
+      audio.crossOrigin = "anonymous";
+      audio.volume = 0.8;
 
-      /* RESPONSIVE SCALE */
+      /*
+       * ── RESPONSIVE SCALE ──────────────────────
+       */
+
       if (!wrapper.hasAttribute("data-fixed-scale")) {
         const updateScale = () => {
           const s = Math.max(0.3, Math.min(root.clientWidth / 800, 1));
+
           wrapper.style.setProperty("--player-scale", String(s));
         };
+
         updateScale();
+
         new ResizeObserver(updateScale).observe(root);
       }
 
-      /* INFO TOGGLE (only when panel exists) */
+      /*
+       * ── INFO TOGGLE ───────────────────────────
+       */
+
       let infoOpen = false;
+
       if (infoBtn && infoPanel) {
         infoBtn.addEventListener("click", () => {
           infoOpen = !infoOpen;
+
           if (infoOpen) {
             infoPanel.style.maxHeight = infoPanel.scrollHeight + "px";
+
             infoPanel.style.opacity = "1";
           } else {
             infoPanel.style.maxHeight = "0";
@@ -660,8 +886,9 @@ console.log(image);
         });
       }
 
-      /* AUDIO */
-      audio.volume = 0.8;
+      /*
+       * ── AUDIO METADATA ────────────────────────
+       */
 
       audio.addEventListener("loadedmetadata", () => {
         tEnd.textContent = formatTime(audio.duration);
@@ -673,18 +900,37 @@ console.log(image);
         syncPositionState(audio);
       });
 
-      // Metadata may already be loaded before this script ran (fast CDN /
-      // cached response), in which case the events above never fire. Read the
-      // current state directly to cover that race.
-      if (audio.readyState >= 1 /* HAVE_METADATA */ && !isNaN(audio.duration)) {
+      /*
+       * Metadata may already be loaded before this script runs.
+       */
+      if (audio.readyState >= 1 && !isNaN(audio.duration)) {
         tEnd.textContent = formatTime(audio.duration);
         syncPositionState(audio);
       }
 
-      /* Cross-player exclusivity: pause others when this one plays */
+      /*
+       * ── PLAY ──────────────────────────────────
+       */
+
       audio.addEventListener("play", () => {
         playIcon.innerHTML = PAUSE;
 
+        /*
+         * Connect this audio to the analyser when playback begins,
+         * but ONLY if the page is currently visible.
+         *
+         * If playback is somehow started while the page is hidden,
+         * we keep the direct-output route.
+         */
+        if (document.visibilityState === "visible") {
+          connectToAnalyser(audio);
+        } else {
+          bypassAnalyser(audio);
+        }
+
+        /*
+         * Set Media Session metadata.
+         */
         if ("mediaSession" in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
             title,
@@ -698,19 +944,12 @@ console.log(image);
               },
             ],
           });
-
-          navigator.mediaSession.setActionHandler("play", () => audio.play());
-          navigator.mediaSession.setActionHandler("pause", () => audio.pause());
-          navigator.mediaSession.setActionHandler("seekbackward", () =>
-            seekBy(-10),
-          );
-          navigator.mediaSession.setActionHandler("seekforward", () =>
-            seekBy(30),
-          );
-
-          syncPositionState(audio);
         }
 
+        /*
+         * Cross-player exclusivity:
+         * pause any other Consolidated Radio player.
+         */
         document
           .querySelectorAll<HTMLAudioElement>(".radio-player-root audio")
           .forEach((other) => {
@@ -718,12 +957,22 @@ console.log(image);
               other.pause();
             }
           });
+
+        syncPositionState(audio);
       });
+
+      /*
+       * ── PAUSE ─────────────────────────────────
+       */
 
       audio.addEventListener("pause", () => {
         playIcon.innerHTML = PLAY;
         syncPositionState(audio);
       });
+
+      /*
+       * ── ENDED ─────────────────────────────────
+       */
 
       audio.addEventListener("ended", () => {
         playIcon.innerHTML = PLAY;
@@ -732,38 +981,95 @@ console.log(image);
         tCur.textContent = "00.00";
       });
 
-      /* PLAY BUTTON */
+      /*
+       * ── PLAY BUTTON ──────────────────────────
+       */
+
       playBtn.addEventListener("click", () => {
         if (audio.paused) {
-          audio.play();
+          audio.play().catch(() => {});
         } else {
           audio.pause();
         }
       });
 
-      /* SKIP BUTTONS */
+      /*
+       * ── SEEK ─────────────────────────────────
+       */
+
       function seekBy(seconds: number) {
         const duration = audio.duration;
+
         if (!duration) return;
+
         audio.currentTime = Math.max(
           0,
           Math.min(duration, audio.currentTime + seconds),
         );
+
         syncPositionState(audio);
       }
 
-      skipBackBtn.addEventListener("click", () => seekBy(-10));
-      skipFwdBtn.addEventListener("click", () => seekBy(30));
+      skipBackBtn.addEventListener("click", () => {
+        seekBy(-10);
+      });
 
-      /* SCRUBBER DRAG */
+      skipFwdBtn.addEventListener("click", () => {
+        seekBy(30);
+      });
+
+      /*
+       * ── MEDIA SESSION ────────────────────────
+       *
+       * Registered once instead of being registered both at load
+       * and again inside the play event.
+       */
+
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.setActionHandler("play", () => {
+          audio.play().catch(() => {});
+        });
+
+        navigator.mediaSession.setActionHandler("pause", () => {
+          audio.pause();
+        });
+
+        navigator.mediaSession.setActionHandler("seekforward", (details) => {
+          seekBy(details.seekOffset || 30);
+        });
+
+        navigator.mediaSession.setActionHandler("seekbackward", (details) => {
+          seekBy(details.seekOffset || 10);
+        });
+
+        navigator.mediaSession.setActionHandler("seekto", (details) => {
+          if (details.seekTime != null) {
+            audio.currentTime = details.seekTime;
+
+            syncPositionState(audio);
+          }
+        });
+      }
+
+      /*
+       * ── SCRUBBER DRAG ─────────────────────────
+       */
+
       let dragging = false;
 
       function updateScrub(x: number) {
         const rect = scrub.getBoundingClientRect();
+
         let pct = (x - rect.left) / rect.width;
+
         pct = Math.max(0, Math.min(1, pct));
-        if (audio.duration) audio.currentTime = pct * audio.duration;
+
+        if (audio.duration) {
+          audio.currentTime = pct * audio.duration;
+        }
+
         fill.style.width = pct * 100 + "%";
+
         thumb.style.left = pct * 100 + "%";
       }
 
@@ -773,37 +1079,62 @@ console.log(image);
       });
 
       window.addEventListener("mousemove", (e) => {
-        if (dragging) updateScrub(e.clientX);
+        if (dragging) {
+          updateScrub(e.clientX);
+        }
       });
 
       window.addEventListener("mouseup", () => {
-        if (dragging) syncPositionState(audio);
+        if (dragging) {
+          syncPositionState(audio);
+        }
+
         dragging = false;
       });
 
+      /*
+       * ── AUDIO TIME UPDATE ─────────────────────
+       */
+
       audio.addEventListener("timeupdate", () => {
         if (!audio.duration) return;
+
         const pct = audio.currentTime / audio.duration;
+
         if (!dragging) {
           fill.style.width = pct * 100 + "%";
+
           thumb.style.left = pct * 100 + "%";
         }
+
         tCur.textContent = formatTime(audio.currentTime);
 
-        // Keep the lock-screen position state fresh throughout playback,
-        // including while backgrounded, so seek offsets stay accurate.
+        /*
+         * Keep iOS Media Session position state fresh.
+         * This is intentionally allowed to run in the
+         * background because it is related to the lock-screen
+         * controls rather than the visualizer.
+         */
         syncPositionState(audio);
       });
 
-      /* VOLUME DRAG */
+      /*
+       * ── VOLUME DRAG ──────────────────────────
+       */
+
       let volDrag = false;
 
       function updateVol(x: number) {
         const rect = vol.getBoundingClientRect();
+
         let pct = (x - rect.left) / rect.width;
+
         pct = Math.max(0, Math.min(1, pct));
+
         audio.volume = pct;
+
         vFill.style.width = pct * 100 + "%";
+
         vThumb.style.left = pct * 100 + "%";
       }
 
@@ -813,7 +1144,9 @@ console.log(image);
       });
 
       window.addEventListener("mousemove", (e) => {
-        if (volDrag) updateVol(e.clientX);
+        if (volDrag) {
+          updateVol(e.clientX);
+        }
       });
 
       window.addEventListener("mouseup", () => {
