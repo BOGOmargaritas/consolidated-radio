@@ -1,0 +1,67 @@
+{
+  "number": 9,
+  "title": "EP09 | DOG DAYS",
+  "date": "2026-08-19",
+  "published": true,
+  "description": "The Dog Days are over. Can you hear the horses?",
+  "image": "/episode-icons/9.png",
+  "audioSrc": "https://bucket.consolidated.radio/e09%20Dog%20Days.mp3",
+  "tracks": [
+    {
+      "artist": "SOFT HAIR",
+      "title": "LYING HAS TO STOP"
+    },
+    {
+      "artist": "BULLION",
+      "title": "RARE"
+    },
+    {
+      "artist": "CUT WORMS",
+      "title": "BALLAD OF THE TEXAS KING"
+    },
+    {
+      "artist": "CUT WORMS",
+      "title": "I'LL NEVER MAKE IT"
+    },
+    {
+      "artist": "NRBQ",
+      "title": "ROLL CALL"
+    },
+    {
+      "artist": "FRIENDSHIP",
+      "title": "HANK"
+    },
+    {
+      "artist": "STEVE LACY",
+      "title": "DARK RED"
+    },
+    {
+      "artist": "VAMPIRE WEEKEND",
+      "title": "CONNECT"
+    },
+    {
+      "artist": "PSYCHIC TV",
+      "title": "WHITE NIGHTS"
+    },
+    {
+      "artist": "MGMT",
+      "title": "PEOPLE IN THE STREETS"
+    },
+    {
+      "artist": "THE STROKES",
+      "title": "GOING TO BABBLE ON"
+    },
+    {
+      "artist": "TOPS",
+      "title": "PERFECTED STEPS"
+    },
+    {
+      "artist": "TEMPER TRAP",
+      "title": "SWEET DISPOSITION"
+    },
+    {
+      "artist": "SPOON",
+      "title": "WHO MAKES YOUR MONEY"
+    }
+  ]
+}
