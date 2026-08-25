@@ -169,9 +169,9 @@ const pathname = Astro.url.pathname;
   <body class={scrollNav ? "scroll-nav" : undefined}>
     {!hideVisualizer && <canvas id="visualizer" />}
     <a href="/" class="logo">
-      <img id="logoImg" src="/badge-cream-1.png" />
+      <img id="logoImg" src="/badge-cream-1.png" style="z-index: -1;" />
     </a>
-    <nav class="site-nav">
+    <nav class="site-nav" style="z-index: -1;">
       <a
         href="/archive/"
         class={pathname.startsWith("/archive") ? "active" : ""}>ARCHIVE</a
