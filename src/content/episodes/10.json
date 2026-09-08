@@ -2,66 +2,62 @@
   "number": 10,
   "title": "EP10 | BUTTERFLY CLIPS",
   "date": "2026-09-08",
-  "published": false,
-  "description": "The Dog Days are over. Can you hear the horses?",
+  "published": true,
+  "description": "The future is finally here. It comes with 56k internet and a personal homepage that takes six minutes to load. Log into cyberspace, check out this new episode, and send your friends an IM on the information superhighway before someone picks up the phone. ^_^",
   "image": "/episode-icons/10.png",
   "audioSrc": "https://bucket.consolidated.radio/e10%20Butterfly%20Clips.mp3",
   "tracks": [
     {
-      "artist": "SOFT HAIR",
-      "title": "LYING HAS TO STOP"
+      "artist": "FATBOY SLIM",
+      "title": "RIGHT HERE RIGHT NOW"
     },
     {
-      "artist": "BULLION",
-      "title": "RARE"
+      "artist": "NELLY",
+      "title": "HOT IN HERRE"
     },
     {
-      "artist": "CUT WORMS",
-      "title": "BALLAD OF THE TEXAS KING"
+      "artist": "OUTKAST",
+      "title": "ROSES"
     },
     {
-      "artist": "CUT WORMS",
-      "title": "I'LL NEVER MAKE IT"
+      "artist": "JAMIROQUAI",
+      "title": "VIRTUAL INSANITY"
     },
     {
-      "artist": "NRBQ",
-      "title": "ROLL CALL"
+      "artist": "CRAZY TOWN",
+      "title": "BUTTERFLY"
     },
     {
-      "artist": "FRIENDSHIP",
-      "title": "HANK"
+      "artist": "ERYKAH BADU",
+      "title": "BAG LADY"
     },
     {
-      "artist": "STEVE LACY",
-      "title": "DARK RED"
+      "artist": "MACY GRAY",
+      "title": "I TRY"
     },
     {
-      "artist": "VAMPIRE WEEKEND",
-      "title": "CONNECT"
+      "artist": "NO DOUBT",
+      "title": "BATH WATER"
     },
     {
-      "artist": "PSYCHIC TV",
-      "title": "WHITE NIGHTS"
+      "artist": "WHEATUS",
+      "title": "TEENAGE DIRTBAG"
     },
     {
-      "artist": "MGMT",
-      "title": "PEOPLE IN THE STREETS"
+      "artist": "THIRD EYE BLIND",
+      "title": "SEMI-CHARMED LIFE"
     },
     {
-      "artist": "THE STROKES",
-      "title": "GOING TO BABBLE ON"
+      "artist": "NELLY FURTADO",
+      "title": "MANEATER"
     },
     {
-      "artist": "TOPS",
-      "title": "PERFECTED STEPS"
+      "artist": "ALANIS MORISSETTE",
+      "title": "YOU OUGHTA KNOW"
     },
     {
-      "artist": "TEMPER TRAP",
-      "title": "SWEET DISPOSITION"
-    },
-    {
-      "artist": "SPOON",
-      "title": "WHO MAKES YOUR MONEY"
+      "artist": "ACE OF BASE",
+      "title": "THE SIGN"
     }
   ]
 }
