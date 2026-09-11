@@ -1,0 +1,63 @@
+{
+  "number": 10,
+  "title": "EP10 | BUTTERFLY CLIPS",
+  "date": "2026-09-08",
+  "published": true,
+  "description": "The future is finally here. It comes with 56k internet and a personal homepage that takes six minutes to load. Log into cyberspace, check out this new episode, and send your friends an IM on the information superhighway before someone picks up the phone. ^_^",
+  "image": "/episode-icons/10.png",
+  "audioSrc": "https://bucket.consolidated.radio/e10%20Butterfly%20Clips.mp3",
+  "tracks": [
+    {
+      "artist": "FATBOY SLIM",
+      "title": "RIGHT HERE RIGHT NOW"
+    },
+    {
+      "artist": "NELLY",
+      "title": "HOT IN HERRE"
+    },
+    {
+      "artist": "OUTKAST",
+      "title": "ROSES"
+    },
+    {
+      "artist": "JAMIROQUAI",
+      "title": "VIRTUAL INSANITY"
+    },
+    {
+      "artist": "CRAZY TOWN",
+      "title": "BUTTERFLY"
+    },
+    {
+      "artist": "ERYKAH BADU",
+      "title": "BAG LADY"
+    },
+    {
+      "artist": "MACY GRAY",
+      "title": "I TRY"
+    },
+    {
+      "artist": "NO DOUBT",
+      "title": "BATHWATER"
+    },
+    {
+      "artist": "WHEATUS",
+      "title": "TEENAGE DIRTBAG"
+    },
+    {
+      "artist": "THIRD EYE BLIND",
+      "title": "SEMI-CHARMED LIFE"
+    },
+    {
+      "artist": "NELLY FURTADO",
+      "title": "MANEATER"
+    },
+    {
+      "artist": "ALANIS MORISSETTE",
+      "title": "YOU OUGHTA KNOW"
+    },
+    {
+      "artist": "ACE OF BASE",
+      "title": "THE SIGN"
+    }
+  ]
+}
