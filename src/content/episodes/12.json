@@ -1,0 +1,76 @@
+{
+  "number": 12,
+  "title": "EP12 | DIAL TONE",
+  "date": "2026-09-24",
+  "published": false,
+  "description": "Ring ring",
+  "image": "/episode-icons/12.png",
+  "audioSrc": "https://bucket.consolidated.radio/e12%20Dial%20Tone.mp3",
+  "tracks": [
+    {
+      "artist": "HER'S",
+      "title": "LOVE ON THE LINE"
+    },
+    {
+      "artist": "PHOENIX",
+      "title": "LONG DISTANCE CALL"
+    },
+    {
+      "artist": "UNKNOWN MORTAL ORCHESTRA",
+      "title": "CAN'T KEEP CHECKING MY PHONE"
+    },
+    {
+      "artist": "HAIM",
+      "title": "3AM"
+    },
+    {
+      "artist": "PHOENIX",
+      "title": "TELEFONO"
+    },
+    {
+      "artist": "LABI SIFFRE",
+      "title": "BLESS THE TELEPHONE"
+    },
+    {
+      "artist": "THE KILLERS",
+      "title": "SHOW YOU HOW"
+    },
+    {
+      "artist": "BLACK KIDS",
+      "title": "YOU ONLY CALL ME WHEN YOU'RE CRYING"
+    },
+    {
+      "artist": "TOMMY TUTONE",
+      "title": "867-5309"
+    },
+    {
+      "artist": "ELECTRIC LIGHT ORCHESTRA",
+      "title": "TELEPHONE LINE"
+    },
+    {
+      "artist": "GLEN CAMPBELL",
+      "title": "WICHITA LINEMAN"
+    },
+    {
+      "artist": "THE RAH BAND",
+      "title": "CLOUDS ACROSS THE MOON"
+    },
+    {
+      "artist": "GORILLAZ",
+      "title": "OUT OF BODY"
+    },
+    {
+      "artist": "MIKAYLA GEIER",
+      "title": "HOTLINE"
+    },
+    {
+      "artist": "FALCO",
+      "title": "NO ANSWER"
+    },
+    ,
+    {
+      "artist": "KRAFTWERK",
+      "title": "THE TELEPHONE CALL"
+    }
+  ]
+}
