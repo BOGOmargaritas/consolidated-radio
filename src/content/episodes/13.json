@@ -1,0 +1,123 @@
+{
+  "number": 13,
+  "title": "EP13 | GRAVEYARD SHIFT",
+  "date": "2026-10-26",
+  "published": true,
+  "description": "Ring ring -- it's for you. EP12 is a love letter to the telephone. The warmth of a voice carried across a wire, the anticipation of a ringing phone and the soft click of a receiver being lifted.",
+  "image": "/episode-icons/13.png",
+  "audioSrc": "https://bucket.consolidated.radio/e13%20Graveyard%20Shift.mp3",
+  "tracks": [
+    {
+      "artist": "TOM WAITS",
+      "title": "WHAT'S HE BUILDING?"
+    },
+    {
+      "artist": "THE SEARCHERS",
+      "title": "LOVE POTION N0.9"
+    },
+    {
+      "artist": "RED LIPSTIQUE",
+      "title": "DRAC'S BACK"
+    },
+    {
+      "artist": "QUANTUM JUMP",
+      "title": "THE SÉANCE (TOO SPOOKY)"
+    },
+    {
+      "artist": "LOU RAWLS",
+      "title": "THIS IS THE NIGHT"
+    },
+    {
+      "artist": "THE ROCKY HORROR PICTURE SHOW",
+      "title": "TIME WARP"
+    },
+    {
+      "artist": "WARREN ZEVON",
+      "title": "WEREWOLVES OF LONDON"
+    },
+    {
+      "artist": "THE KILLERS",
+      "title": "BONES"
+    },
+    {
+      "artist": "JACK WHITE",
+      "title": "THAT BLACK BAT LICORICE"
+    },
+    {
+      "artist": "OLIVIA RODRIGO",
+      "title": "VAMPIRE"
+    },
+    {
+      "artist": "EARLY EYES",
+      "title": "HALLOWEEN '18"
+    },
+    {
+      "artist": "MUSTARD SERVICE",
+      "title": "WEREWOLVES OF HIALEAH"
+    },
+    {
+      "artist": "BILL HURST",
+      "title": "HYPNOTISED"
+    },
+    {
+      "artist": "THE STRANGLERS",
+      "title": "GOLDEN BROWN"
+    },
+    {
+      "artist": "TUXEDOMOON",
+      "title": "JINX"
+    },
+    {
+      "artist": "GOBLIN",
+      "title": "SUSPERIA"
+    },
+    {
+      "artist": "PINK FLOYD",
+      "title": "BRAIN DAMAGE"
+    },
+    {
+      "artist": "RADIOHEAD",
+      "title": "BURN THE WITCH"
+    },
+    {
+      "artist": "SCREAMIN' JAY HAWKINS",
+      "title": "I PUT A SPELL ON YOU"
+    },
+    {
+      "artist": "THE CURE",
+      "title": "DISINTIGRATION"
+    },
+    {
+      "artist": "THE ZOMBIES",
+      "title": "SHE'S NOT THERE"
+    },
+    {
+      "artist": "THE BEATLES",
+      "title": "BEING FOR THE BENEFIT OF MR. KITE"
+    },
+    {
+      "artist": "THE DOORS",
+      "title": "PEOPLE ARE STRANGE"
+    },
+    {
+      "artist": "HELEN",
+      "title": "WITCH"
+    },
+    {
+      "artist": "BAT FOR LASHES",
+      "title": "WHAT'S A GIRL TO DO?"
+    },
+    {
+      "artist": "THE VOIDZ",
+      "title": "SQUARE WAVE"
+    },
+    {
+      "artist": "MGMT",
+      "title": "LITTLE DARK AGE (GHOST VISION REMIX)"
+    },
+    {
+      "artist": "YEAH YEAH YEAHS",
+      "title": "HEADS WILL ROLL (A-TRAK REMIX)"
+    }
+  ]
+}
