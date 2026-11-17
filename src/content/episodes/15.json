@@ -1,0 +1,67 @@
+{
+  "number": 15,
+  "title": "EP15 | SPARE CHANGE",
+  "date": "2026-11-19",
+  "published": false,
+  "description": "A little bit of this, a little bit of that. Spare Change is a collection of odds and ends. No common thread, no particular direction, just a mixed bag of sounds worth sharing. Consider it a little something for your pocket.",
+  "image": "/episode-icons/15.png",
+  "audioSrc": "https://bucket.consolidated.radio/e15%20Spare%20Change.mp3",
+  "tracks": [
+    {
+      "artist": "TSUCHIE",
+      "title": "TUBED (DRUM PLEASE!!!!)"
+    },
+    {
+      "artist": "TROOPER SALUTE",
+      "title": "ZETSUEN"
+    },
+    {
+      "artist": "GRANDADDY",
+      "title": "A.M. 180"
+    },
+    {
+      "artist": "RATATAT",
+      "title": "DRUGS"
+    },
+    {
+      "artist": "FRANK OCEAN",
+      "title": "WHITE FERRARI (HOUSE REMIX)"
+    },
+    {
+      "artist": "FRANK OCEAN",
+      "title": "GODSPEED (HOUSE REMIX)"
+    },
+    {
+      "artist": "FRANK OCEAN",
+      "title": "IVY (HOUSE REMIX)"
+    },
+    {
+      "artist": "ELTON JOHN",
+      "title": "DANIEL"
+    },
+    {
+      "artist": "THE TEARDROP EXPLODES",
+      "title": "BOUNCING BABIES"
+    },
+    {
+      "artist": "THE FRESHIES",
+      "title": "I CAN'T GET 'BOUNCING BABIES' BY THE TEARDROP EXPLODES"
+    },
+    {
+      "artist": "MARK COTTRELL",
+      "title": "I CAN'T GET 'I CAN'T GET BOUNCING BABIES BY THE TEARDROP EXPLODES' BY THE FRESHIES"
+    },
+    {
+      "artist": "THE REPLACEMENTS",
+      "title": "SWINGING PARTY"
+    },
+    {
+      "artist": "POLYPHONIC SIZE",
+      "title": "WINSTON AND JULIA"
+    },
+    {
+      "artist": "FLOCK OF SEAGULLS",
+      "title": "WISHING (IF I HAD A PHOTOGRAPH OF YOU) (EXTENDED)"
+    }
+  ]
+}
