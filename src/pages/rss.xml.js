@@ -57,7 +57,7 @@ export async function GET(context) {
 
   return rss({
     title: "Consolidated Radio",
-    description: "Independent radio, broadcasting 24/7.",
+    description: "Great Food // Classic Rock",
     site: context.site,
     items,
 
@@ -68,8 +68,9 @@ export async function GET(context) {
     customData: `
 	  <language>en-us</language>
 	  <itunes:author>Consolidated Radio</itunes:author>
-	  <itunes:summary>Independent radio, broadcasting 24/7.</itunes:summary>
+	  <itunes:summary>Great Food // Classic Rock</itunes:summary>
 	  <itunes:category text="Music"/>
+	  <itunes:image href="https://consolidated.radio/episodeimage.png"/>
 	`,
   });
 }
